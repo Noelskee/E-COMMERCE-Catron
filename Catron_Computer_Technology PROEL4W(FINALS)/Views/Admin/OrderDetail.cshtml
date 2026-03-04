@@ -1,0 +1,210 @@
+@model Order
+@{ ViewData["Title"] = "Order #" + Model.OrderNumber; Layout = "~/Views/Shared/_AdminLayout.cshtml"; }
+
+@functions {
+    string SC(OrderStatus s) => s switch {
+        OrderStatus.ToPay => "amber", OrderStatus.ToShip => "blue",
+        OrderStatus.ToReceive => "blue", OrderStatus.Completed => "green",
+        OrderStatus.Cancelled => "red", _ => "muted"
+    };
+}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a href="/Admin/Orders" class="btn-outline-sm"><i class="fas fa-arrow-left"></i>Back</a>
+    <div>
+        <h5 style="font-family:'Outfit',sans-serif;font-weight:800;color:var(--txt);margin:0">Order #@Model.OrderNumber</h5>
+        <small style="color:var(--muted)">Placed @Model.CreatedAt.ToString("MMMM dd, yyyy h:mm tt")</small>
+    </div>
+    <span class="badge badge-@SC(Model.Status) ms-auto" style="font-size:.82rem;padding:.45rem .9rem">@Model.Status</span>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <!-- Order Items -->
+        <div class="admin-card">
+            <div class="admin-card-head">
+                <h3><i class="fas fa-shopping-bag" style="color:var(--g400)"></i>Order Items</h3>
+                <span style="color:var(--g300);font-weight:700">₱@Model.TotalAmount.ToString("N0")</span>
+            </div>
+            <div class="p-4">
+                @foreach (var item in Model.OrderItems)
+                {
+                    <div class="d-flex align-items-center gap-3 py-3" style="border-bottom:1px solid var(--bdr)">
+                        <div style="width:55px;height:55px;background:var(--card2);border-radius:10px;
+                                    display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+                            @if (!string.IsNullOrEmpty(item.Product?.ImageUrl))
+                            { <img src="@item.Product.ImageUrl" style="width:100%;height:100%;object-fit:contain;padding:4px" /> }
+                            else
+                            { <i class="fas fa-box" style="color:var(--muted)"></i> }
+                        </div>
+                        <div class="flex-grow-1">
+                            <div style="font-weight:700;color:var(--txt);font-size:.9rem">@item.Product?.Name</div>
+                            <div style="color:var(--muted);font-size:.78rem">Qty: @item.Quantity &bull; ₱@item.UnitPrice.ToString("N0") each</div>
+                        </div>
+                        <div style="font-weight:800;color:var(--g300)">₱@item.Subtotal.ToString("N0")</div>
+                    </div>
+                }
+                <div class="d-flex justify-content-between pt-3">
+                    <span style="font-weight:700;color:var(--txt)">Order Total</span>
+                    <span style="font-weight:900;font-size:1.1rem;color:var(--g300)">₱@Model.TotalAmount.ToString("N0")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery Tracking -->
+        <div class="admin-card">
+            <div class="admin-card-head">
+                <h3><i class="fas fa-truck" style="color:#60a5fa"></i>Delivery Tracking</h3>
+                <button class="btn-primary-sm" onclick="document.getElementById('trackModal').style.display='flex'">
+                    <i class="fas fa-plus"></i>Add Update
+                </button>
+            </div>
+            <div class="p-4">
+                @if (!Model.DeliveryTrackings.Any())
+                { <div class="empty-state" style="padding:2rem 0"><i class="fas fa-truck-loading"></i><p>No tracking updates yet.</p></div> }
+                else
+                {
+                    <div class="track-line">
+                        @foreach (var t in Model.DeliveryTrackings.OrderByDescending(x => x.TrackingTime))
+                        {
+                            <div class="track-item done">
+                                <div class="track-dot"></div>
+                                <div style="font-weight:700;color:var(--txt);font-size:.88rem">@t.Status</div>
+                                @if (!string.IsNullOrEmpty(t.Location))
+                                { <div style="color:var(--muted);font-size:.8rem"><i class="fas fa-map-marker-alt me-1" style="color:var(--red)"></i>@t.Location</div> }
+                                @if (!string.IsNullOrEmpty(t.Notes))
+                                { <div style="color:var(--txt2);font-size:.8rem;margin-top:.2rem">@t.Notes</div> }
+                                <div style="color:var(--muted);font-size:.75rem;margin-top:.2rem"><i class="fas fa-clock me-1"></i>@t.TrackingTime.ToString("MMM dd, yyyy h:mm tt")</div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Update Status -->
+        <div class="admin-card">
+            <div class="admin-card-head"><h3><i class="fas fa-edit" style="color:var(--amber)"></i>Update Status</h3></div>
+            <div class="p-4">
+                <form asp-action="UpdateOrderStatus" asp-controller="Admin" method="post">
+                    <input type="hidden" name="orderId" value="@Model.Id" />
+                    <div class="form-field">
+                        <label>Order Status</label>
+                        <select name="status">
+                            @foreach (var s in Enum.GetValues<OrderStatus>())
+                            { <option value="@s" @@(Model.Status == s ? "selected" : "")>@s</option> }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary-sm w-100 justify-content-center">
+                        <i class="fas fa-save"></i>Update Status
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Customer Info -->
+        <div class="admin-card">
+            <div class="admin-card-head"><h3><i class="fas fa-user" style="color:#60a5fa"></i>Customer</h3></div>
+            <div class="p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div style="width:42px;height:42px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem;flex-shrink:0">
+                        @(Model.Customer?.FirstName[0].ToString() ?? "?")
+                    </div>
+                    <div>
+                        <div style="font-weight:700;color:var(--txt)">@Model.Customer?.FullName</div>
+                        <div style="font-size:.78rem;color:var(--muted)">@Model.Customer?.Email</div>
+                    </div>
+                </div>
+                <div style="color:var(--txt2);font-size:.83rem;margin-bottom:.4rem"><i class="fas fa-phone me-2" style="color:var(--g400)"></i>@(Model.Customer?.PhoneNumber ?? "—")</div>
+                <a href="/Admin/CustomerDetail/@Model.CustomerId" class="btn-outline-sm w-100 justify-content-center mt-3">View Profile →</a>
+            </div>
+        </div>
+
+        <!-- Shipping -->
+        <div class="admin-card">
+            <div class="admin-card-head"><h3><i class="fas fa-map-marker-alt" style="color:var(--red)"></i>Ship To</h3></div>
+            <div class="p-4">
+                <div style="font-weight:700;color:var(--txt);margin-bottom:.3rem">@Model.ShippingFullName</div>
+                <div style="color:var(--txt2);font-size:.84rem;margin-bottom:.3rem">@Model.ShippingAddress</div>
+                <div style="color:var(--muted);font-size:.82rem">@Model.ShippingPhone</div>
+            </div>
+        </div>
+
+        <!-- Payment -->
+        <div class="admin-card">
+            <div class="admin-card-head"><h3><i class="fas fa-wallet" style="color:var(--g400)"></i>Payment</h3></div>
+            <div class="p-4">
+                <div class="d-flex justify-content-between mb-2">
+                    <span style="color:var(--muted);font-size:.82rem">Method</span>
+                    <strong style="font-size:.85rem;color:var(--txt)">@Model.PaymentMethod</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span style="color:var(--muted);font-size:.82rem">Status</span>
+                    <span class="badge @(Model.PaymentStatus == PaymentStatus.Paid ? "badge-green" : "badge-amber")">@Model.PaymentStatus</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span style="color:var(--muted);font-size:.82rem">Total</span>
+                    <strong style="color:var(--g300);font-size:.95rem">₱@Model.TotalAmount.ToString("N0")</strong>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.GCashReference))
+                {
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--muted);font-size:.82rem">GCash Ref</span>
+                        <strong style="font-size:.82rem;color:var(--g400)">@Model.GCashReference</strong>
+                    </div>
+                }
+                @if (Model.Receipt != null)
+                {
+                    <div style="margin-top:.75rem;padding:.5rem .75rem;background:rgba(34,197,94,.1);border-radius:8px;color:var(--g400);font-size:.82rem;font-weight:700">
+                        <i class="fas fa-receipt me-1"></i>Receipt #@Model.Receipt.ReceiptNumber
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tracking Modal -->
+<div id="trackModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);
+     backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center">
+    <div class="modal-box" style="max-width:480px;width:90%">
+        <h3 style="color:var(--txt);margin-bottom:1.2rem"><i class="fas fa-truck me-2" style="color:var(--g400)"></i>Add Delivery Update</h3>
+        <form asp-action="AddDeliveryTracking" asp-controller="Admin" method="post">
+            <input type="hidden" name="OrderId" value="@Model.Id" />
+            <div class="form-field">
+                <label>Status *</label>
+                <select name="Status" required>
+                    <option value="">Select status…</option>
+                    <option>Order Confirmed</option>
+                    <option>Preparing for Shipment</option>
+                    <option>Shipped</option>
+                    <option>In Transit</option>
+                    <option>Out for Delivery</option>
+                    <option>Delivered</option>
+                    <option>Delivery Attempted</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label>Location</label>
+                <input name="Location" placeholder="e.g. Cebu City Hub" />
+            </div>
+            <div class="form-field">
+                <label>Notes</label>
+                <textarea name="Notes" rows="2" placeholder="Additional details…"></textarea>
+            </div>
+            <div class="form-field">
+                <label>Tracking Time</label>
+                <input type="datetime-local" name="TrackingTime" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+            </div>
+            <div class="d-flex gap-2 mt-1">
+                <button type="button" class="btn-outline-sm flex-grow-1 justify-content-center"
+                        onclick="document.getElementById('trackModal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn-primary-sm flex-grow-1 justify-content-center">
+                    <i class="fas fa-plus"></i>Add Update
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

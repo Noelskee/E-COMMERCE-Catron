@@ -1,0 +1,435 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model CustomerDetailViewModel
+@{
+    ViewData["Title"] = "Customer: " + Model.Customer.FullName; Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@functions {
+    string StatusColor(OrderStatus s) => s switch
+    {
+        OrderStatus.ToPay => "amber",
+        OrderStatus.ToShip => "blue",
+        OrderStatus.ToReceive => "blue",
+        OrderStatus.Completed => "green",
+        OrderStatus.Cancelled => "red",
+        _ => "muted"
+    };
+}
+
+<style>
+    /* ── CustomerDetail Admin Styles ──────────────────────────── */
+    .cd-back {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .45rem .9rem;
+        border-radius: 9px;
+        border: 1.5px solid var(--bdr2);
+        background: transparent;
+        color: var(--txt2);
+        font-size: .82rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all var(--tr);
+    }
+
+        .cd-back:hover {
+            border-color: var(--g400);
+            color: var(--g400);
+            background: rgba(34,197,94,.06);
+        }
+
+    .cd-page-title {
+        font-family: 'Outfit',sans-serif;
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: var(--txt);
+        margin: 0;
+    }
+
+    .cd-card {
+        background: var(--card);
+        border: 1px solid var(--bdr);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .cd-card-head {
+        padding: 1rem 1.4rem;
+        border-bottom: 1px solid var(--bdr);
+        background: rgba(255,255,255,.02);
+        font-family: 'Outfit',sans-serif;
+        font-size: .88rem;
+        font-weight: 800;
+        color: var(--txt);
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+        .cd-card-head i {
+            color: var(--g400);
+        }
+
+    .cd-card-body {
+        padding: 1.4rem;
+    }
+
+    /* Avatar */
+    .cd-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg,var(--g500),#14532d);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Outfit',sans-serif;
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #fff;
+        margin: 0 auto 1rem;
+        box-shadow: 0 6px 24px rgba(22,163,74,.3);
+    }
+
+    .cd-name {
+        font-family: 'Outfit',sans-serif;
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: var(--txt);
+        text-align: center;
+        margin-bottom: .2rem;
+    }
+
+    .cd-email {
+        font-size: .82rem;
+        color: var(--muted);
+        text-align: center;
+        margin-bottom: .15rem;
+    }
+
+    .cd-phone {
+        font-size: .8rem;
+        color: var(--muted);
+        text-align: center;
+        margin-bottom: 1.2rem;
+    }
+
+    /* Stats row */
+    .cd-stats {
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: .5rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .cd-stat {
+        background: var(--card2);
+        border: 1px solid var(--bdr);
+        border-radius: 10px;
+        padding: .75rem .5rem;
+        text-align: center;
+    }
+
+    .cd-stat-val {
+        font-family: 'Outfit',sans-serif;
+        font-size: 1.05rem;
+        font-weight: 900;
+        color: var(--txt);
+        display: block;
+        margin-bottom: .15rem;
+    }
+
+    .cd-stat-lbl {
+        font-size: .66rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    /* Status badge */
+    .cd-status-active {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .3rem .8rem;
+        border-radius: 100px;
+        font-size: .75rem;
+        font-weight: 800;
+        background: rgba(34,197,94,.12);
+        color: var(--g400);
+        border: 1px solid rgba(34,197,94,.25);
+    }
+
+    .cd-status-suspended {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .3rem .8rem;
+        border-radius: 100px;
+        font-size: .75rem;
+        font-weight: 800;
+        background: rgba(239,68,68,.1);
+        color: var(--red);
+        border: 1px solid rgba(239,68,68,.25);
+    }
+
+    /* Toggle button */
+    .cd-btn-suspend {
+        width: 100%;
+        padding: .62rem;
+        border-radius: 9px;
+        border: 1.5px solid rgba(245,158,11,.35);
+        background: rgba(245,158,11,.07);
+        color: var(--amber);
+        font-size: .82rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Plus Jakarta Sans',sans-serif;
+        transition: all var(--tr);
+    }
+
+        .cd-btn-suspend:hover {
+            background: rgba(245,158,11,.15);
+            border-color: var(--amber);
+        }
+
+    .cd-btn-activate {
+        width: 100%;
+        padding: .62rem;
+        border-radius: 9px;
+        border: 1.5px solid rgba(34,197,94,.3);
+        background: rgba(34,197,94,.08);
+        color: var(--g400);
+        font-size: .82rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Plus Jakarta Sans',sans-serif;
+        transition: all var(--tr);
+    }
+
+        .cd-btn-activate:hover {
+            background: rgba(34,197,94,.16);
+        }
+
+    /* Address cards */
+    .cd-addr {
+        background: var(--card2);
+        border: 1px solid var(--bdr);
+        border-radius: 10px;
+        padding: .85rem;
+        margin-bottom: .6rem;
+    }
+
+        .cd-addr.default {
+            border-color: rgba(34,197,94,.4);
+        }
+
+    .cd-addr-name {
+        font-size: .85rem;
+        font-weight: 700;
+        color: var(--txt);
+        margin-bottom: .18rem;
+    }
+
+    .cd-addr-line {
+        font-size: .76rem;
+        color: var(--muted);
+        margin-bottom: .1rem;
+    }
+
+    /* Table */
+    .cd-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: .82rem;
+    }
+
+        .cd-table th {
+            padding: .7rem 1rem;
+            text-align: left;
+            font-size: .65rem;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid var(--bdr);
+            font-weight: 700;
+        }
+
+        .cd-table td {
+            padding: .8rem 1rem;
+            border-bottom: 1px solid rgba(18,34,24,.6);
+            color: #b5cebb;
+            vertical-align: middle;
+        }
+
+        .cd-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .cd-table tbody tr:hover td {
+            background: rgba(34,197,94,.04);
+        }
+
+    .cd-tbl-link {
+        color: var(--g400);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: .79rem;
+        transition: color var(--tr);
+    }
+
+        .cd-tbl-link:hover {
+            color: var(--g300);
+        }
+
+    .cd-empty {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        color: var(--muted);
+    }
+
+        .cd-empty i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: .6rem;
+            opacity: .2;
+        }
+</style>
+
+<!-- Header -->
+<div style="display:flex;align-items:center;gap:.85rem;margin:1rem 0 1.4rem;flex-wrap:wrap">
+    <a href="/Admin/Customers" class="cd-back"><i class="fas fa-arrow-left"></i> Customers</a>
+    <div>
+        <h5 class="cd-page-title">@Model.Customer.FullName</h5>
+        <span style="font-size:.76rem;color:var(--muted)">Customer since @Model.Customer.CreatedAt.ToString("MMMM dd, yyyy")</span>
+    </div>
+    <div style="margin-left:auto">
+        @if (Model.Customer.IsActive)
+        {
+            <span class="cd-status-active"><i class="fas fa-circle" style="font-size:.45rem"></i>Active</span>
+        }
+        else
+        {
+            <span class="cd-status-suspended"><i class="fas fa-circle" style="font-size:.45rem"></i>Suspended</span>
+        }
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:280px 1fr;gap:1rem;align-items:start">
+
+    <!-- ── Left Column ─────────────────────────────────────── -->
+    <div>
+        <!-- Profile card -->
+        <div class="cd-card">
+            <div class="cd-card-body" style="text-align:center">
+                <div class="cd-avatar">@Model.Customer.FirstName[0]@Model.Customer.LastName[0]</div>
+                <div class="cd-name">@Model.Customer.FullName</div>
+                <div class="cd-email">@Model.Customer.Email</div>
+                <div class="cd-phone">@(Model.Customer.PhoneNumber ?? "No phone on file")</div>
+
+                <div class="cd-stats">
+                    <div class="cd-stat">
+                        <span class="cd-stat-val">@Model.Orders.Count</span>
+                        <span class="cd-stat-lbl">Orders</span>
+                    </div>
+                    <div class="cd-stat">
+                        <span class="cd-stat-val" style="font-size:.85rem">₱@(Model.Orders.Sum(o => o.TotalAmount).ToString("N0"))</span>
+                        <span class="cd-stat-lbl">Spent</span>
+                    </div>
+                    <div class="cd-stat">
+                        <span class="cd-stat-val">@Model.Addresses.Count</span>
+                        <span class="cd-stat-lbl">Addresses</span>
+                    </div>
+                </div>
+
+                <form asp-action="ToggleCustomerStatus" asp-controller="Admin" method="post">
+                    <input type="hidden" name="id" value="@Model.Customer.Id" />
+                    @if (Model.Customer.IsActive)
+                    {
+                        <button class="cd-btn-suspend" onclick="return confirm('Suspend this customer?')">
+                            <i class="fas fa-user-slash me-1"></i>Suspend Account
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="cd-btn-activate" onclick="return confirm('Activate this customer?')">
+                            <i class="fas fa-user-check me-1"></i>Activate Account
+                        </button>
+                    }
+                </form>
+            </div>
+        </div>
+
+        <!-- Saved Addresses -->
+        <div class="cd-card">
+            <div class="cd-card-head"><i class="fas fa-map-marker-alt"></i>Saved Addresses</div>
+            <div class="cd-card-body" style="padding-top:.8rem">
+                @if (!Model.Addresses.Any())
+                {
+                    <div class="cd-empty"><i class="fas fa-map-marker-alt"></i>No saved addresses.</div>
+                }
+                else
+                {
+                    @foreach (var a in Model.Addresses)
+                    {
+                        <div class="cd-addr @(a.IsDefault ? "default" : "")">
+                            @if (a.IsDefault)
+                            {
+                                <span style="font-size:.66rem;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.3rem">
+                                    <i class="fas fa-star" style="font-size:.55rem"></i> Default Shipping
+                                </span>
+                            }
+                            <div class="cd-addr-name">@a.FullName</div>
+                            <div class="cd-addr-line">@a.Address</div>
+                            <div class="cd-addr-line">@a.PhoneNumber</div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Right Column ────────────────────────────────────── -->
+    <div class="cd-card">
+        <div class="cd-card-head"><i class="fas fa-box-open"></i>Order History (@Model.Orders.Count)</div>
+        <div class="cd-card-body" style="padding:0">
+            @if (!Model.Orders.Any())
+            {
+                <div class="cd-empty"><i class="fas fa-box-open"></i>No orders placed yet.</div>
+            }
+            else
+            {
+                <div style="overflow-x:auto">
+                    <table class="cd-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var o in Model.Orders)
+                            {
+                                <tr>
+                                    <td><strong style="font-family:'Outfit',sans-serif;color:var(--txt)">#@o.OrderNumber</strong></td>
+                                    <td>@o.OrderItems.Count item(s)</td>
+                                    <td style="font-weight:700;color:var(--g400)">₱@o.TotalAmount.ToString("N0")</td>
+                                    <td><span class="badge-@StatusColor(o.Status)" style="font-size:.74rem;font-weight:700;padding:.25rem .65rem;border-radius:100px;display:inline-block">@o.Status</span></td>
+                                    <td>@o.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td><a href="/Admin/OrderDetail/@o.Id" class="cd-tbl-link">View →</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+

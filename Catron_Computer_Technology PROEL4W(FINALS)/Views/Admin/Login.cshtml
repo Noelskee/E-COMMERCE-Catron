@@ -1,0 +1,68 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model AdminLoginViewModel
+@{
+    ViewData["Title"] = "Admin Login"; Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin Login – Catron</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+    <link href="/css/admin.css" rel="stylesheet" />
+</head>
+<body style="align-items:center;justify-content:center;min-height:100vh;display:flex;padding:1.5rem;background:radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,.22) 0%, transparent 70%), var(--bg);">
+    <div class="auth-wrap">
+        <div class="auth-brand">
+            <div class="brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="brand-title">Admin Portal</div>
+            <div class="brand-sub">Catron Computer Technology</div>
+        </div>
+        <div class="auth-card">
+            <form asp-action="Login" asp-controller="Admin" method="post">
+                <div asp-validation-summary="ModelOnly" class="val-summary"></div>
+                <div class="field">
+                    <label asp-for="Username">Username</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-user-shield ico"></i>
+                        <input asp-for="Username" placeholder="admin" autocomplete="username" />
+                    </div>
+                    <span asp-validation-for="Username" class="field-err"></span>
+                </div>
+                <div class="field">
+                    <div class="label-row">
+                        <label asp-for="Password">Password</label>
+                        <a href="/Admin/ForgotPassword" class="forgot-link">Forgot password?</a>
+                    </div>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-lock ico"></i>
+                        <input asp-for="Password" type="password" id="pwdInput" placeholder="••••••••" autocomplete="current-password" />
+                        <button class="eye-btn" type="button" onclick="togglePwd()">
+                            <i class="fa-solid fa-eye" id="pwdIcon"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="field-err"></span>
+                </div>
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-right-to-bracket" style="margin-right:.5rem"></i>Login to Admin Panel
+                </button>
+            </form>
+            <div class="divider">or</div>
+            <div class="auth-foot">Need an account? <a href="/Admin/Register">Register Admin</a></div>
+            <div class="auth-foot" style="margin-top:.85rem">
+                <a href="/Customer/Index" class="store-link"><i class="fa-solid fa-store"></i> Go to Customer Store</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        function togglePwd() {
+            const i = document.getElementById('pwdInput');
+            const ic = document.getElementById('pwdIcon');
+            i.type = i.type === 'password' ? 'text' : 'password';
+            ic.className = i.type === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+﻿/* ══════════════════════════════════════════════════════════════════
+   CATRON COMPUTER TECHNOLOGY · Admin ProductForm CSS
+   Theme: Deep Forest Green — matches customer store palette
+   Fonts: Outfit (display) + Plus Jakarta Sans (body)
+   ══════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+/* ─── Design Tokens (mirrored from store) ─────────────────────── */
+:root {
+    --g900: #052e16;
+    --g800: #14532d;
+    --g700: #166534;
+    --g600: #15803d;
+    --g500: #16a34a;
+    --g400: #22c55e;
+    --g300: #4ade80;
+    --g200: #bbf7d0;
+    --g100: #dcfce7;
+    --g50: #f0fdf4;
+    --red: #dc2626;
+    --red-lt: #fef2f2;
+    --gold: #d97706;
+    --blue: #2563eb;
+    --info: #06b6d4;
+    --info-lt: #ecfeff;
+    --txt: #0f172a;
+    --txt2: #475569;
+    --txt3: #94a3b8;
+    --surf: #ffffff;
+    --surf2: #f8fafc;
+    --surf3: #f1f5f9;
+    --bdr: #e2e8f0;
+    --bdr2: #cbd5e1;
+    --accent: var(--g500);
+    --accent-hover: var(--g600);
+    --accent-light: var(--g50);
+    --border-focus: var(--g500);
+    --shadow-focus: 0 0 0 3.5px rgba(22, 163, 74, 0.18);
+    --shd-green: 0 6px 24px rgba(22, 163, 74, .30);
+    --shadow-sm: 0 2px 12px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.05);
+    --shadow-md: 0 8px 32px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-display: 'Outfit', sans-serif;
+    --tr: .2s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* ─── Base ────────────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body,
+.admin-content {
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--txt);
+    background: var(--surf3);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(circle at 1px 1px, rgba(22,163,74,0.045) 1px, transparent 0);
+    background-size: 28px 28px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* ─── Animations ──────────────────────────────────────────────── */
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ─── Page Header ─────────────────────────────────────────────── */
+.page-header-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--txt);
+    letter-spacing: -0.01em;
+    margin: 0;
+}
+
+/* ─── Back Button ─────────────────────────────────────────────── */
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    background: var(--surf);
+    color: var(--txt2);
+    border: 1.5px solid var(--bdr);
+    border-radius: var(--radius-sm);
+    font-size: 0.83rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--tr);
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+}
+
+    .btn-back:hover {
+        background: var(--g50);
+        border-color: var(--g400);
+        color: var(--g700);
+        transform: translateX(-2px);
+    }
+
+/* ─── Cards ───────────────────────────────────────────────────── */
+.pf-card {
+    background: var(--surf);
+    border: 1.5px solid var(--bdr);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--tr);
+    overflow: hidden;
+    animation: fadeSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+    .pf-card:nth-child(2) {
+        animation-delay: 0.07s;
+    }
+
+    .pf-card:hover {
+        box-shadow: var(--shadow-md);
+    }
+
+.pf-card-body {
+    padding: 2rem;
+}
+
+.pf-card-header {
+    padding: 1.5rem 2rem 0;
+    background: transparent;
+    border: none;
+}
+
+    .pf-card-header h6 {
+        font-family: var(--font-display);
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--txt);
+        letter-spacing: 0.01em;
+        margin: 0;
+    }
+
+/* ─── Labels ──────────────────────────────────────────────────── */
+.form-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--txt2);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.required-star {
+    color: var(--red);
+    margin-left: 2px;
+}
+
+.optional-tag {
+    font-size: 0.73rem;
+    font-weight: 400;
+    color: var(--txt3);
+    margin-left: 4px;
+}
+
+/* ─── Inputs & Selects ────────────────────────────────────────── */
+.form-control,
+.form-select {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--txt);
+    background: var(--surf2);
+    border: 1.5px solid var(--bdr);
+    border-radius: 10px;
+    padding: 10px 14px;
+    width: 100%;
+    transition: border-color var(--tr), box-shadow var(--tr), background var(--tr), transform var(--tr);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+    .form-control::placeholder {
+        color: var(--txt3);
+        font-weight: 400;
+    }
+
+    .form-control:hover,
+    .form-select:hover {
+        border-color: var(--bdr2);
+        background: var(--surf);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--g500);
+        background: var(--surf);
+        box-shadow: var(--shadow-focus);
+        transform: translateY(-1px);
+    }
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.6;
+}
+
+.form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+/* ─── Input Group (₱ prefix) ──────────────────────────────────── */
+.input-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.input-group-text {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--txt3);
+    background: var(--surf3);
+    border: 1.5px solid var(--bdr);
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+    padding: 10px 14px;
+    white-space: nowrap;
+    transition: background var(--tr), border-color var(--tr), color var(--tr);
+}
+
+.input-group .form-control {
+    border-radius: 0 10px 10px 0;
+    border-left: none;
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: var(--g500);
+    background: rgba(22, 163, 74, 0.08);
+    color: var(--g600);
+}
+
+.input-group:focus-within .form-control {
+    border-color: var(--g500);
+    box-shadow: var(--shadow-focus);
+}
+
+/* ─── Validation ──────────────────────────────────────────────── */
+.text-danger.small,
+.field-validation-error {
+    font-size: 0.77rem;
+    color: var(--red);
+    margin-top: 5px;
+    display: block;
+    font-weight: 500;
+}
+
+.alert-danger {
+    background: rgba(220, 38, 38, 0.08);
+    border: 1.5px solid #fca5a5;
+    border-radius: var(--radius-sm);
+    color: #991b1b;
+    font-size: 0.84rem;
+    padding: 12px 16px;
+}
+
+/* ─── Toggle Switch ───────────────────────────────────────────── */
+.toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--surf2);
+    border: 1.5px solid var(--bdr);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--tr), border-color var(--tr);
+}
+
+    .toggle-row:hover {
+        background: var(--g50);
+        border-color: var(--g400);
+    }
+
+.form-check-input[type="checkbox"][role="switch"] {
+    width: 42px;
+    height: 22px;
+    background-color: #d1d5db;
+    border: none;
+    border-radius: 99px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    transition: background var(--tr);
+    flex-shrink: 0;
+}
+
+    .form-check-input[type="checkbox"][role="switch"]::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 16px;
+        height: 16px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        transition: transform var(--tr);
+    }
+
+    .form-check-input[type="checkbox"][role="switch"]:checked {
+        background-color: var(--g500);
+    }
+
+        .form-check-input[type="checkbox"][role="switch"]:checked::after {
+            transform: translateX(20px);
+        }
+
+.toggle-label {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--txt);
+    cursor: pointer;
+    margin: 0;
+    user-select: none;
+}
+
+/* ─── Submit Button ───────────────────────────────────────────── */
+.btn-primary-pf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 26px;
+    background: linear-gradient(135deg, var(--g500), var(--g700));
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform var(--tr), box-shadow var(--tr);
+    box-shadow: var(--shd-green);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+}
+
+    .btn-primary-pf:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(22, 163, 74, 0.45);
+    }
+
+    .btn-primary-pf:active {
+        transform: translateY(0);
+    }
+
+/* ─── Cancel Button ───────────────────────────────────────────── */
+.btn-cancel-pf {
+    display: inline-flex;
+    align-items: center;
+    padding: 11px 22px;
+    background: transparent;
+    color: var(--txt2);
+    border: 1.5px solid var(--bdr2);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--tr);
+}
+
+    .btn-cancel-pf:hover {
+        background: var(--surf3);
+        border-color: var(--bdr2);
+        color: var(--txt);
+    }
+
+/* ─── Form Helpers ────────────────────────────────────────────── */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.1rem;
+}
+
+.field-hint {
+    font-size: 0.74rem;
+    color: var(--txt3);
+    margin-top: 5px;
+    transition: color var(--tr);
+}
+
+.form-control:focus + .field-hint,
+.form-select:focus + .field-hint {
+    color: var(--g600);
+}
+
+/* ─── Image Preview ───────────────────────────────────────────── */
+.img-preview-wrap {
+    width: 100%;
+    height: 210px;
+    background: linear-gradient(135deg, var(--g50) 0%, #e8fdf0 100%);
+    border: 2px dashed var(--g200);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    transition: border-color var(--tr), background var(--tr);
+    position: relative;
+}
+
+    .img-preview-wrap:has(img) {
+        border-style: solid;
+        border-color: var(--bdr);
+        background: var(--surf2);
+    }
+
+    .img-preview-wrap img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: var(--radius-sm);
+    }
+
+.img-placeholder {
+    text-align: center;
+    pointer-events: none;
+}
+
+    .img-placeholder i {
+        font-size: 2.8rem;
+        color: var(--g300);
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .img-placeholder p {
+        font-size: 0.79rem;
+        color: var(--txt3);
+        margin: 0;
+    }
+
+/* ─── Tips Card ───────────────────────────────────────────────── */
+.tips-card {
+    background: linear-gradient(135deg, var(--g50) 0%, #eefbf4 100%);
+    border: 1.5px solid var(--g200);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    margin-top: 1rem;
+}
+
+.tips-card-title {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--g700);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+    .tips-list li {
+        font-size: 0.8rem;
+        color: var(--txt2);
+        padding: 4px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        line-height: 1.5;
+    }
+
+        .tips-list li::before {
+            content: '→';
+            color: var(--g500);
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+/* ─── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .pf-card-body {
+        padding: 1.25rem;
+    }
+
+    .page-title {
+        font-size: 1.1rem;
+    }
+
+    .btn-primary-pf,
+    .btn-cancel-pf {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .img-preview-wrap {
+        height: 160px;
+    }
+}
+
+/* ─── Number input spinners ───────────────────────────────────── */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    opacity: 0.4;
+}

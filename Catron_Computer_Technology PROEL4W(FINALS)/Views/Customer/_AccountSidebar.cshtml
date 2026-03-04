@@ -1,0 +1,40 @@
+@model Customer
+@{
+    var active = ViewData["Active"]?.ToString() ?? "";
+    var name = Model?.FullName ?? Context.Session.GetString("CustomerName") ?? "My Account";
+    var email = Model?.Email ?? Context.Session.GetString("CustomerEmail") ?? "";
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body text-center p-4 border-bottom">
+        <div class="account-avatar mx-auto mb-3"><i class="fas fa-user-circle"></i></div>
+        <h6 class="fw-bold mb-0">@name</h6>
+        @if (!string.IsNullOrEmpty(email))
+        {
+            <p class="text-muted small mb-0">@email</p>
+        }
+    </div>
+    <nav class="list-group list-group-flush rounded-bottom-4">
+        <a href="/Customer/ManageAccount" class="list-group-item list-group-item-action py-3 @(active == "manage" ? "active" : "")">
+            <i class="fas fa-cog me-2 text-primary"></i>Manage My Account
+        </a>
+        <a href="/Customer/MyOrders" class="list-group-item list-group-item-action py-3 @(active == "orders" ? "active" : "")">
+            <i class="fas fa-box-open me-2 text-warning"></i>My Orders
+        </a>
+        <a href="/Customer/MyWishList" class="list-group-item list-group-item-action py-3 @(active == "wishlist" ? "active" : "")">
+            <i class="fas fa-heart me-2 text-danger"></i>My Wishlist
+        </a>
+        <a href="#" class="list-group-item list-group-item-action py-3">
+            <i class="fas fa-store me-2 text-info"></i>Followed Stores
+        </a>
+        <a href="/Customer/MyReviews" class="list-group-item list-group-item-action py-3 @(active == "reviews" ? "active" : "")">
+            <i class="fas fa-star me-2 text-warning"></i>My Reviews
+        </a>
+        <a href="/Customer/MyReturns" class="list-group-item list-group-item-action py-3 @(active == "returns" ? "active" : "")">
+            <i class="fas fa-undo me-2 text-secondary"></i>Returns &amp; Cancellations
+        </a>
+        <a href="/Customer/Logout" class="list-group-item list-group-item-action py-3 text-danger">
+            <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+    </nav>
+</div>

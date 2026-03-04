@@ -1,0 +1,176 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model CartViewModel
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/Customer/Index">Home</a></li>
+            <li class="breadcrumb-item active">Cart</li>
+        </ol>
+    </nav>
+    <h4 class="fw-bold mb-4" style="font-family:'Outfit',sans-serif">
+        <i class="fas fa-shopping-cart me-2 text-success"></i>Shopping Cart
+        @if (Model.CartItems.Any())
+        {
+            <span class="badge rounded-pill ms-2" style="background:var(--g100);color:var(--g700);font-size:.7rem">@Model.TotalItems items</span>
+        }
+    </h4>
+
+    @if (!Model.CartItems.Any())
+    {
+        <div class="text-center py-5">
+            <div style="width:100px;height:100px;border-radius:50%;background:var(--g50);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem">
+                <i class="fas fa-shopping-cart fs-1" style="color:var(--g300)"></i>
+            </div>
+            <h5 class="text-muted fw-bold">Your cart is empty</h5>
+            <p class="text-muted mb-4">Discover our amazing products and add them to your cart!</p>
+            <a href="/Customer/Products" class="btn btn-brand px-5 py-2">
+                <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0" style="border-collapse:separate">
+                                <thead>
+                                    <tr style="background:var(--g50)">
+                                        <th class="ps-4 py-3" style="border-bottom:1px solid var(--bdr)">Product</th>
+                                        <th class="text-center py-3" style="border-bottom:1px solid var(--bdr)">Price</th>
+                                        <th class="text-center py-3" style="border-bottom:1px solid var(--bdr)">Qty</th>
+                                        <th class="text-center py-3" style="border-bottom:1px solid var(--bdr)">Subtotal</th>
+                                        <th class="py-3" style="border-bottom:1px solid var(--bdr)"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.CartItems)
+                                    {
+                                        <tr id="cart-row-@item.Id" class="cart-row">
+                                            <td class="ps-4 py-3">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div style="width:62px;height:62px;flex-shrink:0;border-radius:10px;background:var(--g50);overflow:hidden;display:flex;align-items:center;justify-content:center">
+                                                        @if (!string.IsNullOrEmpty(item.Product.ImageUrl))
+                                                        {
+                                                            <img src="@item.Product.ImageUrl" style="width:100%;height:100%;object-fit:contain;padding:4px" alt="@item.Product.Name" />
+                                                        }
+                                                        else
+                                                        {
+
+                                                            <i class="@(item.Product.Category?.IconClass ?? "fas fa-box") text-success fs-4"></i>
+                                                        }
+                                                    </div>
+                                                    <div>
+                                                        <a href="/Customer/ProductDetail/@item.ProductId"
+                                                           class="fw-bold text-decoration-none" style="color:var(--txt);font-size:.92rem">@item.Product.Name</a>
+                                                        <div class="text-muted small">@item.Product.Brand · @item.Product.Category?.Name</div>
+                                                        <div class="small" style="color:var(--g600);font-weight:700">₱@item.Product.FinalPrice.ToString("N0") each</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center fw-semibold">₱@item.Product.FinalPrice.ToString("N0")</td>
+                                            <td class="text-center">
+                                                <div class="d-flex align-items-center justify-content-center gap-1">
+                                                    <button class="btn btn-outline-secondary btn-sm px-2 py-1 fw-bold"
+                                                            onclick="updateQty(@item.Id, @(item.Quantity - 1))" style="line-height:1;min-width:30px">
+                                                        −
+                                                    </button>
+                                                    <span class="fw-bold px-2 fs-6" id="qty-@item.Id">@item.Quantity</span>
+                                                    <button class="btn btn-outline-secondary btn-sm px-2 py-1 fw-bold"
+                                                            onclick="updateQty(@item.Id, @(item.Quantity + 1))" style="line-height:1;min-width:30px">
+                                                        +
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td class="text-center fw-bold" id="sub-@item.Id" style="color:var(--g700)">₱@item.Subtotal.ToString("N0")</td>
+                                            <td class="pe-3 text-center">
+                                                <button class="btn btn-sm p-1" onclick="removeCartItem(@item.Id)"
+                                                        style="color:var(--red);background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);border-radius:8px"
+                                                        title="Remove">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-3">
+                    <a href="/Customer/Products" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                    </a>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top:90px">
+                    <div class="card-body p-0">
+                        <div class="p-4" style="background:linear-gradient(135deg,var(--g800),var(--g900));border-radius:18px 18px 0 0">
+                            <h5 class="fw-bold mb-0 text-white"><i class="fas fa-receipt me-2"></i>Order Summary</h5>
+                        </div>
+                        <div class="p-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Items (@Model.TotalItems)</span>
+                                <span id="cart-total">₱@Model.TotalAmount.ToString("N0")</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Shipping</span>
+                                <span class="fw-bold" style="color:var(--g600)">FREE</span>
+                            </div>
+                            <hr />
+                            <div class="d-flex justify-content-between fw-bold fs-5 mb-4">
+                                <span>Total</span>
+                                <span style="color:var(--g700)" id="cart-grand-total">₱@Model.TotalAmount.ToString("N0")</span>
+                            </div>
+                            <a href="/Customer/Checkout" class="btn btn-brand w-100 btn-lg fw-bold py-3" style="font-family:'Outfit',sans-serif">
+                                <i class="fas fa-lock me-2"></i>Proceed to Checkout
+                            </a>
+                            <div class="text-center mt-3">
+                                <small class="text-muted"><i class="fas fa-shield-alt me-1 text-success"></i>Secure Checkout</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Override updateQty to also update grand total in cart page
+        const _origUpdateQty = window.updateQty;
+        window.updateQty = function(cartItemId, newQty) {
+            if (newQty < 1) { removeCartItem(cartItemId); return; }
+            fetch('/Customer/UpdateCartItem', {
+                method: 'POST', credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cartItemId: cartItemId, quantity: newQty })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) { showToast('Update failed.', 'error'); return; }
+                const qtyEl = document.getElementById('qty-' + cartItemId);
+                const subEl = document.getElementById('sub-' + cartItemId);
+                if (qtyEl) qtyEl.textContent = newQty;
+                if (subEl) subEl.textContent = '₱' + Number(data.subtotal).toLocaleString('en-PH', {minimumFractionDigits:0});
+                const fmt = '₱' + Number(data.total).toLocaleString('en-PH', {minimumFractionDigits:0});
+                const t1 = document.getElementById('cart-total');
+                const t2 = document.getElementById('cart-grand-total');
+                if (t1) t1.textContent = fmt;
+                if (t2) t2.textContent = fmt;
+                setCartBadge(data.count);
+            })
+            .catch(() => showToast('Network error.', 'error'));
+        };
+    </script>
+}

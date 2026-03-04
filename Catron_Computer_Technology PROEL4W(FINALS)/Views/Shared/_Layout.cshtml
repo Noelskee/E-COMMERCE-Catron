@@ -1,0 +1,182 @@
+﻿@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " | " : "")Catron Computer Technology</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="/css/site.css" rel="stylesheet" />
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+
+    <!-- TOP BAR -->
+    <div class="top-bar py-1">
+        <div class="container d-flex justify-content-between align-items-center">
+            <small class="text-white opacity-75"><i class="fas fa-phone me-1"></i>+63 912 345 6789 &nbsp;|&nbsp; <i class="fas fa-envelope me-1"></i>support&#64;catrontech.ph</small>
+            <div class="d-flex gap-3">
+                @if (Context.Session.GetString("CustomerName") != null)
+                {
+                    <span class="text-white small fw-semibold"><i class="fas fa-user me-1 text-warning"></i>@Context.Session.GetString("CustomerName")</span>
+                    <a href="/Customer/Logout" class="text-white small opacity-75 text-decoration-none"><i class="fas fa-sign-out-alt me-1"></i>Logout</a>
+                }
+                else
+                {
+                    <a href="/Customer/Login" class="text-white small text-decoration-none opacity-75"><i class="fas fa-sign-in-alt me-1"></i>Login</a>
+                    <a href="/Customer/Register" class="text-white small text-decoration-none opacity-75"><i class="fas fa-user-plus me-1"></i>Register</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark main-navbar sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" href="/Customer/Index">
+                <div class="brand-icon"><i class="fas fa-microchip"></i></div>
+                <div>
+                    <span class="brand-name">CATRON</span>
+                    <small class="d-block brand-sub">Computer Technology</small>
+                </div>
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav mx-auto gap-1">
+                    <li class="nav-item"><a class="nav-link px-3" href="/Customer/Index"><i class="fas fa-home me-1"></i>Home</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/Customer/Products"><i class="fas fa-th-large me-1"></i>Products</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/Customer/About"><i class="fas fa-info-circle me-1"></i>About</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/Customer/Contact"><i class="fas fa-envelope me-1"></i>Contact</a></li>
+                </ul>
+
+                <form class="d-flex me-3" action="/Customer/Products" method="get">
+                    <div class="input-group input-group-sm search-bar">
+                        <input class="form-control border-0" type="search" name="search" placeholder="Search products..." />
+                        <button class="btn btn-green px-3" type="submit" style="background:var(--g500);color:#fff;border:none;"><i class="fas fa-search"></i></button>
+                    </div>
+                </form>
+
+                <div class="d-flex align-items-center gap-2">
+                    @if (Context.Session.GetInt32("CustomerId") != null)
+                    {
+                        <a href="/Customer/Cart" class="nav-icon-btn position-relative" title="Cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-badge" id="cartCount" style="display:none">0</span>
+                        </a>
+                        <a href="/Customer/MyWishList" class="nav-icon-btn" title="Wishlist">
+                            <i class="fas fa-heart"></i>
+                        </a>
+                        <div class="dropdown">
+                            <button class="nav-icon-btn dropdown-toggle border-0 bg-transparent" data-bs-toggle="dropdown" title="My Account">
+                                <i class="fas fa-user-circle"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end account-dropdown shadow-lg border-0 mt-2">
+                                <li class="px-3 py-2 border-bottom">
+                                    <div class="fw-semibold text-dark small">@Context.Session.GetString("CustomerName")</div>
+                                    <div class="text-muted" style="font-size:.75rem">@Context.Session.GetString("CustomerEmail")</div>
+                                </li>
+                                <li><a class="dropdown-item py-2" href="/Customer/ManageAccount"><i class="fas fa-cog me-2 text-primary"></i>Manage My Account</a></li>
+                                <li><a class="dropdown-item py-2" href="/Customer/MyOrders"><i class="fas fa-box-open me-2 text-warning"></i>My Orders</a></li>
+                                <li><a class="dropdown-item py-2" href="/Customer/MyWishList"><i class="fas fa-heart me-2 text-danger"></i>My Wishlist</a></li>
+                                <li><a class="dropdown-item py-2" href="/Customer/MyReviews"><i class="fas fa-star me-2 text-warning"></i>My Reviews</a></li>
+                                <li><a class="dropdown-item py-2" href="/Customer/MyReturns"><i class="fas fa-undo me-2 text-secondary"></i>Returns</a></li>
+                                <li><hr class="dropdown-divider my-1" /></li>
+                                <li><a class="dropdown-item py-2 text-danger" href="/Customer/Logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="/Customer/Login" class="btn btn-outline-light btn-sm px-3">Login</a>
+                        <a href="/Customer/Register" class="btn btn-brand btn-sm px-3 fw-semibold">Register</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- FLASH MESSAGES -->
+    <div class="container mt-3">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show"><i class="fas fa-check-circle me-2"></i>@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        }
+        @if (TempData["Info"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show"><i class="fas fa-info-circle me-2"></i>@TempData["Info"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show"><i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        }
+    </div>
+
+    <main>@RenderBody()</main>
+
+    <!-- FOOTER -->
+    <footer class="main-footer mt-5 pt-5 pb-4">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="brand-icon"><i class="fas fa-microchip"></i></div>
+                        <div>
+                            <span class="fw-bold fs-5 text-white">CATRON</span>
+                            <small class="d-block text-white-50">Computer Technology</small>
+                        </div>
+                    </div>
+                    <p class="text-white-50 small">Your leading computer supplier in the Philippines. Quality products, unbeatable prices, trusted service.</p>
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="text-white fw-semibold mb-3">Navigation</h6>
+                    <ul class="footer-links">
+                        <li><a href="/Customer/Index">Home</a></li>
+                        <li><a href="/Customer/Products">Products</a></li>
+                        <li><a href="/Customer/About">About Us</a></li>
+                        <li><a href="/Customer/Contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3">
+                    <h6 class="text-white fw-semibold mb-3">Categories</h6>
+                    <ul class="footer-links">
+                        <li><a href="/Customer/Products?categoryId=1">Laptops</a></li>
+                        <li><a href="/Customer/Products?categoryId=2">Desktops</a></li>
+                        <li><a href="/Customer/Products?categoryId=5">Mobile Devices</a></li>
+                        <li><a href="/Customer/Products?categoryId=7">Hardware</a></li>
+                        <li><a href="/Customer/Products?categoryId=8">Printers</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3">
+                    <h6 class="text-white fw-semibold mb-3">Contact Us</h6>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt me-2 text-warning"></i>Cebu City, Philippines</li>
+                        <li><i class="fas fa-phone me-2 text-warning"></i>+63 912 345 6789</li>
+                        <li><i class="fas fa-envelope me-2 text-warning"></i>support&#64;catrontech.ph</li>
+                        <li><i class="fas fa-clock me-2 text-warning"></i>Mon – Sat: 8 AM – 6 PM</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="border-secondary mt-4" />
+            <p class="text-center text-white-50 small mb-0">&copy; @DateTime.Now.Year Catron Computer Technology. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/site.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

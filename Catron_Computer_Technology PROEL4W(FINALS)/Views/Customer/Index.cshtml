@@ -1,0 +1,133 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- HERO -->
+<section class="hero-section">
+    <div class="container py-5">
+        <div class="row align-items-center min-vh-hero">
+            <div class="col-lg-6">
+                <div class="hero-badge mb-3"><i class="fas fa-bolt me-1 text-warning"></i>Philippines #1 Computer Shop</div>
+                <h1 class="hero-title">Power Your<br /><span class="text-warning">Digital World</span></h1>
+                <p class="hero-subtitle mt-3 mb-4">Laptops, Desktops, Mobile Devices, Peripherals, Software & more — all at unbeatable prices in Cebu.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="/Customer/Products" class="btn btn-warning btn-lg px-4 fw-semibold shadow">
+                        <i class="fas fa-shopping-bag me-2"></i>Shop Now
+                    </a>
+                    <a href="/Customer/About" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-info-circle me-2"></i>Learn More
+                    </a>
+                </div>
+                <div class="d-flex gap-4 mt-4">
+                    <div class="hero-stat"><div class="hero-stat-num">500+</div><div class="hero-stat-label">Products</div></div>
+                    <div class="hero-stat"><div class="hero-stat-num">10K+</div><div class="hero-stat-label">Customers</div></div>
+                    <div class="hero-stat"><div class="hero-stat-num">5★</div><div class="hero-stat-label">Rated</div></div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center d-none d-lg-block">
+                <div class="hero-visual">
+                    <i class="fas fa-laptop-code hero-icon"></i>
+                    <div class="floating-badge badge-1"><i class="fas fa-shield-alt me-1"></i>Genuine Products</div>
+                    <div class="floating-badge badge-2"><i class="fas fa-truck me-1"></i>Fast Delivery</div>
+                    <div class="floating-badge badge-3"><i class="fas fa-headset me-1"></i>24/7 Support</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="section-header text-center mb-4">
+            <h2 class="fw-bold">Shop by Category</h2>
+            <p class="text-muted">Find exactly what you need</p>
+        </div>
+        <div class="row g-3 justify-content-center">
+            @foreach (var cat in Model.Categories)
+            {
+                <div class="col-6 col-md-3 col-lg-2">
+                    <a href="/Customer/Products?categoryId=@cat.Id" class="category-card text-decoration-none text-center d-block">
+                        <div class="cat-icon"><i class="@cat.IconClass"></i></div>
+                        <div class="cat-name">@cat.Name</div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="py-5">
+    <div class="container">
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">Featured Products</h2>
+                <p class="text-muted mb-0">Hand-picked for you</p>
+            </div>
+            <a href="/Customer/Products" class="btn btn-outline-primary">View All <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+        <div class="row g-4">
+            @foreach (var p in Model.FeaturedProducts)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="product-card h-100">
+                        <a href="/Customer/ProductDetail/@p.Id" class="text-decoration-none">
+                            <div class="product-img-wrap">
+                                @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                {
+                                    <img src="@p.ImageUrl" class="product-img" alt="@p.Name" loading="lazy" />
+                                }
+                                else
+                                {
+
+                                    <div class="product-img-placeholder"><i class="@(p.Category.IconClass ?? "fas fa-box")"></i></div>
+                                }
+                                @if (p.DiscountPercent.HasValue)
+                                {
+                                    <span class="discount-badge">-@p.DiscountPercent%</span>
+                                }
+                            </div>
+                            <div class="product-body">
+                                <div class="product-category small text-muted mb-1">@p.Category.Name</div>
+                                <h6 class="product-name text-dark">@p.Name</h6>
+                                <div class="product-brand small text-muted">@p.Brand</div>
+                                <div class="product-price mt-2">
+                                    <span class="price-final">₱@p.FinalPrice.ToString("N0")</span>
+                                    @if (p.DiscountPrice.HasValue && p.DiscountPrice < p.Price)
+                                    {
+                                        <span class="price-original text-decoration-line-through text-muted ms-2 small">₱@p.Price.ToString("N0")</span>
+                                    }
+                                </div>
+                            </div>
+                        </a>
+                        <div class="product-actions px-3 pb-3 d-flex gap-2">
+                            <button onclick="addToCart(@p.Id)" class="btn btn-warning btn-sm flex-grow-1 fw-semibold">
+                                <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                            </button>
+                            <button onclick="toggleWishlist(@p.Id, this)" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- WHY US -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="fw-bold text-center mb-4">Why Choose Catron?</h2>
+        <div class="row g-4 text-center">
+            <div class="col-md-3"><div class="why-card"><i class="fas fa-shield-alt text-primary fs-2 mb-3"></i><h6 class="fw-bold">100% Genuine</h6><p class="text-muted small mb-0">All products are brand-new and authentic</p></div></div>
+            <div class="col-md-3"><div class="why-card"><i class="fas fa-truck text-warning fs-2 mb-3"></i><h6 class="fw-bold">Fast Delivery</h6><p class="text-muted small mb-0">Same-day delivery within Cebu City</p></div></div>
+            <div class="col-md-3"><div class="why-card"><i class="fas fa-headset text-success fs-2 mb-3"></i><h6 class="fw-bold">24/7 Support</h6><p class="text-muted small mb-0">Always here when you need us</p></div></div>
+            <div class="col-md-3"><div class="why-card"><i class="fas fa-undo text-danger fs-2 mb-3"></i><h6 class="fw-bold">Easy Returns</h6><p class="text-muted small mb-0">Hassle-free 7-day return policy</p></div></div>
+        </div>
+    </div>
+</section>
+

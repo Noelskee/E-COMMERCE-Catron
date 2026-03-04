@@ -1,0 +1,65 @@
+@{
+    ViewData["Title"] = "Contact Us";
+}
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">Get In Touch</h2>
+        <p class="text-muted">We'd love to hear from you. Send us a message!</p>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-lg-5">
+            <div class="contact-info-card">
+                <h5 class="fw-bold mb-4">Contact Information</h5>
+                <div class="contact-item d-flex gap-3 mb-4">
+                    <div class="contact-icon bg-primary-soft"><i class="fas fa-map-marker-alt text-primary"></i></div>
+                    <div><strong class="d-block">Address</strong><span class="text-muted small">123 Colon Street, Cebu City, Philippines 6000</span></div>
+                </div>
+                <div class="contact-item d-flex gap-3 mb-4">
+                    <div class="contact-icon bg-warning-soft"><i class="fas fa-phone text-warning"></i></div>
+                    <div><strong class="d-block">Phone</strong><span class="text-muted small">+63 912 345 6789</span></div>
+                </div>
+                <div class="contact-item d-flex gap-3 mb-4">
+                    <div class="contact-icon bg-success-soft"><i class="fas fa-envelope text-success"></i></div>
+                    <div><strong class="d-block">Email</strong><span class="text-muted small">support&#64;catrontech.ph</span></div>
+                </div>
+                <div class="contact-item d-flex gap-3">
+                    <div class="contact-icon bg-info-soft"><i class="fas fa-clock text-info"></i></div>
+                    <div><strong class="d-block">Store Hours</strong><span class="text-muted small">Mon – Sat: 8:00 AM – 6:00 PM<br />Sunday: Closed</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-4">Send a Message</h5>
+                <form asp-action="Contact" method="post">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Your Name</label>
+                            <input name="name" class="form-control" placeholder="Juan dela Cruz" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Email Address</label>
+                            <input name="email" type="email" class="form-control" placeholder="juan@example.com" required />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Subject</label>
+                            <input name="subject" class="form-control" placeholder="How can we help?" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Message</label>
+                            <textarea name="message" class="form-control" rows="5" placeholder="Tell us more..." required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                                <i class="fas fa-paper-plane me-2"></i>Send Message
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,69 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model AdminRegisterViewModel
+@{
+    ViewData["Title"] = "Register Admin"; Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Register Admin – Catron</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+    <link href="/css/admin.css" rel="stylesheet" />
+</head>
+<body style="align-items:center;justify-content:center;min-height:100vh;display:flex;padding:1.5rem;background:radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,.22) 0%, transparent 70%), var(--bg);">
+    <div class="auth-wrap" style="max-width:480px">
+        <div class="auth-brand">
+            <div class="brand-icon"><i class="fa-solid fa-user-shield"></i></div>
+            <div class="brand-title">Create Admin Account</div>
+            <div class="brand-sub">Catron Computer Technology</div>
+        </div>
+        <div class="auth-card">
+            <form asp-action="Register" asp-controller="Admin" method="post">
+                <div asp-validation-summary="ModelOnly" class="val-summary"></div>
+                <div class="field">
+                    <label asp-for="Username">Username</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-user ico"></i>
+                        <input asp-for="Username" placeholder="adminuser" autocomplete="username" />
+                    </div>
+                    <span asp-validation-for="Username" class="field-err"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Email">Email Address</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-envelope ico"></i>
+                        <input asp-for="Email" placeholder="admin@catrontech.ph" autocomplete="email" />
+                    </div>
+                    <span asp-validation-for="Email" class="field-err"></span>
+                </div>
+                <div class="grid-2">
+                    <div class="field">
+                        <label asp-for="Password">Password</label>
+                        <div class="input-wrap">
+                            <i class="fa-solid fa-lock ico"></i>
+                            <input asp-for="Password" type="password" placeholder="Min. 6 chars" autocomplete="new-password" />
+                        </div>
+                        <span asp-validation-for="Password" class="field-err"></span>
+                    </div>
+                    <div class="field">
+                        <label asp-for="ConfirmPassword">Confirm</label>
+                        <div class="input-wrap">
+                            <i class="fa-solid fa-lock ico"></i>
+                            <input asp-for="ConfirmPassword" type="password" placeholder="Repeat" autocomplete="new-password" />
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="field-err"></span>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-user-plus" style="margin-right:.5rem"></i>Create Admin Account
+                </button>
+            </form>
+            <div class="divider">or</div>
+            <div class="auth-foot">Already have an account? <a href="/Admin/Login">Login here</a></div>
+        </div>
+    </div>
+</body>
+</html>

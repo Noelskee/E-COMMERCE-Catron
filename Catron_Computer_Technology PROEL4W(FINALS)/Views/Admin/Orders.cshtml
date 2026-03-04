@@ -1,0 +1,133 @@
+@model IEnumerable<Order>
+@{
+    ViewData["Title"] = "Orders"; Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var filter = ViewBag.Filter as string ?? "All";
+}
+
+@functions {
+    string SC(OrderStatus s) => s switch
+    {
+        OrderStatus.ToPay => "amber",
+        OrderStatus.ToShip => "blue",
+        OrderStatus.ToReceive => "blue",
+        OrderStatus.ToReview => "green",
+        OrderStatus.Completed => "green",
+        OrderStatus.ReturnRefund => "muted",
+        OrderStatus.Cancelled => "red",
+        _ => "muted"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 style="font-family:'Outfit',sans-serif;font-weight:800;color:var(--txt);margin:0">Orders Management</h5>
+        <small style="color:var(--muted)">@Model.Count() order(s) · Total: ₱@Model.Sum(o => o.TotalAmount).ToString("N0")</small>
+    </div>
+    <div class="live-dot" title="Live"></div>
+</div>
+
+<!-- Summary stats row -->
+<div class="row g-3 mb-4">
+    @{
+        var pending = Model.Count(o => o.Status == OrderStatus.ToPay);
+        var shipping = Model.Count(o => o.Status == OrderStatus.ToShip || o.Status == OrderStatus.ToReceive);
+        var done = Model.Count(o => o.Status == OrderStatus.Completed);
+        var cancelled = Model.Count(o => o.Status == OrderStatus.Cancelled);
+    }
+    <div class="col-6 col-md-3">
+        <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1rem;text-align:center">
+            <div style="font-family:'Outfit',sans-serif;font-size:1.5rem;font-weight:800;color:var(--amber)">@pending</div>
+            <div style="font-size:.75rem;color:var(--muted)">Pending Payment</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1rem;text-align:center">
+            <div style="font-family:'Outfit',sans-serif;font-size:1.5rem;font-weight:800;color:#60a5fa">@shipping</div>
+            <div style="font-size:.75rem;color:var(--muted)">In Transit</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1rem;text-align:center">
+            <div style="font-family:'Outfit',sans-serif;font-size:1.5rem;font-weight:800;color:var(--g400)">@done</div>
+            <div style="font-size:.75rem;color:var(--muted)">Completed</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div style="background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:1rem;text-align:center">
+            <div style="font-family:'Outfit',sans-serif;font-size:1.5rem;font-weight:800;color:var(--red)">@cancelled</div>
+            <div style="font-size:.75rem;color:var(--muted)">Cancelled</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter bar -->
+<div class="toolbar mb-4">
+    <div class="search-box" style="max-width:280px">
+        <i class="fas fa-search"></i>
+        <input type="text" id="orderSearch" placeholder="Search orders..." oninput="filterRows()" />
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        @foreach (var tab in new[] { "All", "ToPay", "ToShip", "ToReceive", "Completed", "Cancelled" })
+        {
+            <a href="/Admin/Orders?filter=@tab" class="filter-btn @(filter == tab ? "active" : "")">@tab</a>
+        }
+    </div>
+</div>
+
+<div class="admin-card">
+    @if (!Model.Any())
+    {
+        <div class="empty-state"><i class="fas fa-inbox"></i><p>No orders found for this filter.</p></div>
+    }
+    else
+    {
+        <table class="data-table" id="ordersTable">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model)
+                {
+                    <tr data-search="@o.OrderNumber @o.Customer?.FullName @o.Customer?.Email">
+                        <td><span class="tbl-link">#@o.OrderNumber</span></td>
+                        <td>
+                            <div style="font-weight:700;color:var(--txt);font-size:.85rem">@o.Customer?.FullName</div>
+                            <div style="font-size:.72rem;color:var(--muted)">@o.Customer?.Email</div>
+                        </td>
+                        <td style="color:var(--txt2)">@o.OrderItems.Count pc(s)</td>
+                        <td style="font-weight:800;color:var(--g300)">₱@o.TotalAmount.ToString("N0")</td>
+                        <td><span class="badge badge-muted">@o.PaymentMethod</span></td>
+                        <td><span class="badge badge-@SC(o.Status)">@o.Status</span></td>
+                        <td style="color:var(--muted);font-size:.78rem">@o.CreatedAt.ToString("MMM dd, yyyy")</td>
+                        <td>
+                            <a href="/Admin/OrderDetail/@o.Id" class="btn-outline-sm">
+                                <i class="fas fa-eye"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function filterRows() {
+            const q = document.getElementById('orderSearch').value.toLowerCase();
+            document.querySelectorAll('#ordersTable tbody tr').forEach(row => {
+                const txt = (row.dataset.search || row.textContent).toLowerCase();
+                row.style.display = txt.includes(q) ? '' : 'none';
+            });
+        }
+    </script>
+}

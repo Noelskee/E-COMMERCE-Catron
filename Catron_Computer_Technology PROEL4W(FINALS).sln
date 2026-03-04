@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36804.6
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Catron_Computer_Technology PROEL4W(FINALS)", "Catron_Computer_Technology PROEL4W(FINALS)\Catron_Computer_Technology PROEL4W(FINALS).csproj", "{6E3C0B85-251B-49FE-A216-2F9ABF90BA49}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6E3C0B85-251B-49FE-A216-2F9ABF90BA49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E3C0B85-251B-49FE-A216-2F9ABF90BA49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E3C0B85-251B-49FE-A216-2F9ABF90BA49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E3C0B85-251B-49FE-A216-2F9ABF90BA49}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {679D535F-1BBF-4B92-B506-4CC9D9FE72A3}
+	EndGlobalSection
+EndGlobal

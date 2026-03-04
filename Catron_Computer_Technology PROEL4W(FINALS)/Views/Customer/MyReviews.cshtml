@@ -1,0 +1,76 @@
+@model IEnumerable<Review>
+@{
+    ViewData["Title"] = "My Reviews";
+}
+
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-lg-3">
+            @await Html.PartialAsync("_AccountSidebar", null as Customer,
+            new ViewDataDictionary(ViewData) { { "Active", "reviews" } })
+        </div>
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-star text-warning me-2"></i>My Reviews
+                        <span class="badge bg-warning text-dark ms-2">@Model.Count()</span>
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-star fs-1 text-muted mb-3 d-block"></i>
+                            <h6 class="text-muted">You haven't written any reviews yet.</h6>
+                            <p class="text-muted small">Complete an order to review your purchased products.</p>
+                            <a href="/Customer/MyOrders" class="btn btn-warning btn-sm mt-2">View My Orders</a>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var r in Model)
+                        {
+                            <div class="border rounded-3 p-4 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="d-flex gap-3 align-items-center">
+                                        <div style="width:48px;height:48px;background:#f8f9fa;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+                                            @if (!string.IsNullOrEmpty(r.Product?.ImageUrl))
+                                            {
+                                                <img src="@r.Product.ImageUrl" style="width:100%;height:100%;object-fit:cover" class="rounded-2" />
+                                            }
+                                            else
+                                            {
+
+                                                <i class="fas fa-box text-muted"></i>
+                                            }
+                                        </div>
+                                        <div>
+                                            <a href="/Customer/ProductDetail/@r.ProductId" class="fw-semibold text-dark text-decoration-none">
+                                                @r.Product?.Name
+                                            </a>
+                                            <div class="d-flex gap-1 mt-1">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i class="fas fa-star @(i <= r.Rating ? "text-warning" : "text-muted") small"></i>
+                                                }
+                                                <span class="small text-muted ms-1">@r.Rating/5</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">@r.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                </div>
+                                @if (!string.IsNullOrEmpty(r.Comment))
+                                {
+                                    <p class="text-muted small mt-3 mb-0 ps-1">
+                                        <i class="fas fa-quote-left text-muted me-1 opacity-50"></i>@r.Comment
+                                    </p>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

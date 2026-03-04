@@ -1,0 +1,168 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model PaymentViewModel
+@{
+    ViewData["Title"] = "Complete Payment";
+}
+
+<div class="container py-4" style="max-width:720px">
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center mb-3"
+             style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--g500),var(--g700))">
+            <i class="fas fa-shield-alt text-white fs-3"></i>
+        </div>
+        <h4 class="fw-bold" style="font-family:'Outfit',sans-serif">Complete Your Payment</h4>
+        <p class="text-muted">Order <strong>#@Model.Order.OrderNumber</strong> &bull; Total: <strong style="color:var(--g700)">₱@Model.Order.TotalAmount.ToString("N0")</strong></p>
+    </div>
+
+    @if (Model.SelectedMethod == PaymentMethod.GCash)
+    {
+        <!-- GCash Payment Panel -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <span class="badge rounded-pill px-4 py-2 fw-bold mb-3"
+                          style="background:#e8f4ff;color:#0070f0;font-size:.9rem">
+                        <i class="fas fa-mobile-alt me-2"></i>GCash Payment
+                    </span>
+                    <h5 class="fw-bold mb-1">Pay via GCash</h5>
+                    <p class="text-muted small">Send the exact amount to our GCash number or scan the QR code below</p>
+                </div>
+
+                <div class="row g-4 align-items-center">
+                    <!-- QR Code -->
+                    <div class="col-md-5 text-center">
+                        @if (!string.IsNullOrEmpty(Model.QrCodeBase64))
+                        {
+                            <div class="p-3 rounded-3 d-inline-block" style="background:#fff;border:3px solid #0070f0;border-radius:16px!important">
+                                <img src="data:image/png;base64,@Model.QrCodeBase64"
+                                     class="qr-code-img" alt="GCash QR Code" style="width:170px;height:170px" />
+                            </div>
+                            <div class="mt-2 small text-muted">Scan with GCash app</div>
+                        }
+                    </div>
+
+                    <!-- OR / Number -->
+                    <div class="col-md-7">
+                        <div class="gcash-panel p-4 rounded-4" style="border:2px solid #0070f0;background:linear-gradient(160deg,#e8f4ff,#f0f7ff)">
+                            <div class="text-center mb-3">
+                                <div class="small text-muted mb-1">Send <strong>₱@Model.Order.TotalAmount.ToString("N0")</strong> to:</div>
+                                <div class="gcash-number">@(Model.GCashNumber ?? "+63 912 345 6789")</div>
+                                <div class="small text-muted">Catron Computer Technology</div>
+                            </div>
+                            <div class="gcash-step"><div class="gcash-step-num">1</div><span class="small">Open GCash → Send Money</span></div>
+                            <div class="gcash-step"><div class="gcash-step-num">2</div><span class="small">Enter number &amp; amount ₱@Model.Order.TotalAmount.ToString("N0")</span></div>
+                            <div class="gcash-step"><div class="gcash-step-num">3</div><span class="small">Screenshot the Reference Number</span></div>
+                            <div class="gcash-step mb-0"><div class="gcash-step-num">4</div><span class="small">Enter it below to confirm</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reference input -->
+                <hr class="my-4" />
+                <form asp-action="ConfirmPayment" method="post">
+                    <input type="hidden" name="orderId" value="@Model.Order.Id" />
+                    <label class="form-label fw-bold">GCash Reference Number <span class="text-danger">*</span></label>
+                    <div class="input-group input-group-lg mb-2">
+                        <span class="input-group-text" style="background:#e8f4ff;border-color:#0070f0;color:#0070f0">
+                            <i class="fas fa-hashtag"></i>
+                        </span>
+                        <input name="gcashReference" class="form-control text-center fw-bold fs-5"
+                               style="border-color:#0070f0;letter-spacing:.08em"
+                               placeholder="0000000000000" maxlength="13" required />
+                    </div>
+                    <small class="text-muted d-block mb-4">Enter the 13-digit reference number from your GCash confirmation SMS.</small>
+                    <button type="submit" class="btn w-100 btn-lg fw-bold py-3"
+                            style="background:#0070f0;color:#fff;border-radius:12px;font-family:'Outfit',sans-serif">
+                        <i class="fas fa-check-circle me-2"></i>Confirm GCash Payment
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+    else if (Model.SelectedMethod == PaymentMethod.Cash)
+    {
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4 text-center">
+                <div style="width:80px;height:80px;border-radius:50%;background:var(--g50);
+                                display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem">
+                    <i class="fas fa-money-bill-wave text-success" style="font-size:2.2rem"></i>
+                </div>
+                <h5 class="fw-bold">Cash on Delivery</h5>
+                <p class="text-muted mb-4">Please prepare the exact amount of <strong>₱@Model.Order.TotalAmount.ToString("N0")</strong> upon delivery. Our rider will collect payment when your order arrives.</p>
+                <form asp-action="ConfirmPayment" method="post">
+                    <input type="hidden" name="orderId" value="@Model.Order.Id" />
+                    <button type="submit" class="btn btn-brand btn-lg px-5 fw-bold py-3" style="font-family:'Outfit',sans-serif">
+                        <i class="fas fa-check-circle me-2"></i>Confirm Order
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+    else if (Model.SelectedMethod == PaymentMethod.DebitCard || Model.SelectedMethod == PaymentMethod.CreditCard)
+    {
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <div style="width:80px;height:80px;border-radius:50%;background:#eff6ff;
+                                    display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem">
+                        <i class="fas fa-credit-card text-primary" style="font-size:2.2rem"></i>
+                    </div>
+                    <h5 class="fw-bold">@Model.SelectedMethod Payment</h5>
+                    <p class="text-muted">Total amount: <strong>₱@Model.Order.TotalAmount.ToString("N0")</strong></p>
+                </div>
+                <!-- Mock card form -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold small">Card Number</label>
+                        <input class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-semibold small">Expiry Date</label>
+                        <input class="form-control" placeholder="MM / YY" maxlength="7" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-semibold small">CVV</label>
+                        <input class="form-control" placeholder="•••" maxlength="4" type="password" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold small">Cardholder Name</label>
+                        <input class="form-control" placeholder="JUAN DELA CRUZ" />
+                    </div>
+                </div>
+                <form asp-action="ConfirmPayment" method="post">
+                    <input type="hidden" name="orderId" value="@Model.Order.Id" />
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3" style="font-family:'Outfit',sans-serif">
+                        <i class="fas fa-lock me-2"></i>Pay ₱@Model.Order.TotalAmount.ToString("N0")
+                    </button>
+                </form>
+                <div class="text-center mt-3">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/120px-Visa_Inc._logo.svg.png" height="22" class="me-3 opacity-75" alt="Visa" />
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/120px-Mastercard-logo.svg.png" height="22" class="opacity-75" alt="Mastercard" />
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Order Items Summary -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+            <h6 class="fw-bold mb-3"><i class="fas fa-receipt text-success me-2"></i>Order Summary</h6>
+            @foreach (var item in Model.Order.OrderItems)
+            {
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-pill fw-bold" style="background:var(--g100);color:var(--g700)">×@item.Quantity</span>
+                        <span class="small fw-semibold">@item.Product?.Name</span>
+                    </div>
+                    <span class="small fw-bold">₱@item.Subtotal.ToString("N0")</span>
+                </div>
+            }
+            <div class="d-flex justify-content-between pt-3 fw-bold">
+                <span>Total</span>
+                <span style="color:var(--g700);font-size:1.1rem">₱@Model.Order.TotalAmount.ToString("N0")</span>
+            </div>
+        </div>
+    </div>
+</div>

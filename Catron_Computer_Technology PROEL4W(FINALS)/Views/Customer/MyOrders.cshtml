@@ -1,0 +1,201 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model OrderListViewModel
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+@functions {
+    string StatusColor(OrderStatus s) => s switch
+    {
+        OrderStatus.ToPay => "warning",
+        OrderStatus.ToShip => "info",
+        OrderStatus.ToReceive => "primary",
+        OrderStatus.ToReview => "success",
+        OrderStatus.Completed => "success",
+        OrderStatus.ReturnRefund => "secondary",
+        OrderStatus.Cancelled => "danger",
+        _ => "secondary"
+    };
+    string StatusIcon(OrderStatus s) => s switch
+    {
+        OrderStatus.ToPay => "fa-credit-card",
+        OrderStatus.ToShip => "fa-box",
+        OrderStatus.ToReceive => "fa-truck",
+        OrderStatus.ToReview => "fa-star",
+        OrderStatus.Completed => "fa-check-circle",
+        OrderStatus.ReturnRefund => "fa-undo",
+        OrderStatus.Cancelled => "fa-times-circle",
+        _ => "fa-circle"
+    };
+}
+
+<div class="container py-4">
+    <div class="row g-4">
+
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            @await Html.PartialAsync("_AccountSidebar", null as Customer,
+            new ViewDataDictionary(ViewData) { { "Active", "orders" } })
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-box-open text-warning me-2"></i>My Orders</h5>
+
+                    <!-- Filter Tabs -->
+                    <ul class="nav nav-tabs border-0 flex-wrap gap-1" style="font-size:0.85rem">
+                        @foreach (var tab in new[] { "All", "ToPay", "ToShip", "ToReceive", "ToReview", "ReturnRefund", "Cancelled" })
+                        {
+                            var label = tab == "ToPay" ? "To Pay"
+                            : tab == "ToShip" ? "To Ship"
+                            : tab == "ToReceive" ? "To Receive"
+                            : tab == "ToReview" ? "To Review"
+                            : tab == "ReturnRefund" ? "Return/Refund"
+                            : tab;
+                            <li class="nav-item">
+                                <a class="nav-link px-3 py-2 @(Model.Filter == tab ? "active" : "")"
+                                   href="/Customer/MyOrders?filter=@tab">@label</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <div class="card-body p-4">
+                    @if (!Model.Orders.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fs-1 text-muted mb-3 d-block"></i>
+                            <h6 class="text-muted">No orders found for this filter.</h6>
+                            <a href="/Customer/Products" class="btn btn-primary btn-sm mt-2">
+                                <i class="fas fa-shopping-bag me-1"></i>Start Shopping
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var o in Model.Orders)
+                        {
+                            <div class="order-card border rounded-3 mb-3 overflow-hidden">
+                                <!-- Order Header -->
+                                <div class="d-flex justify-content-between align-items-center p-3 bg-light border-bottom">
+                                    <div>
+                                        <strong class="me-2">#@o.OrderNumber</strong>
+                                        <small class="text-muted">@o.CreatedAt.ToString("MMM dd, yyyy h:mm tt")</small>
+                                    </div>
+                                    <span class="badge bg-@StatusColor(o.Status) px-3 py-2">
+                                        <i class="fas @StatusIcon(o.Status) me-1"></i>@o.Status
+                                    </span>
+                                </div>
+
+                                <!-- Order Items Preview -->
+                                <div class="p-3">
+                                    @foreach (var item in o.OrderItems.Take(2))
+                                    {
+                                        <div class="d-flex align-items-center gap-3 mb-2">
+                                            <div class="cart-img-placeholder rounded-2 flex-shrink-0" style="width:48px;height:48px">
+                                                @if (!string.IsNullOrEmpty(item.Product?.ImageUrl))
+                                                {
+                                                    <img src="@item.Product.ImageUrl" class="w-100 h-100 rounded-2" style="object-fit:cover" />
+                                                }
+                                                else
+                                                {
+
+                                                    <i class="fas fa-box text-muted" style="font-size:1.2rem"></i>
+                                                }
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-semibold small">@item.Product?.Name</div>
+                                                <div class="text-muted small">×@item.Quantity &bull; ₱@item.UnitPrice.ToString("N0") each</div>
+                                            </div>
+                                            <div class="fw-semibold small">₱@item.Subtotal.ToString("N0")</div>
+                                        </div>
+                                    }
+                                    @if (o.OrderItems.Count > 2)
+                                    {
+                                        <div class="text-muted small ps-1">+@(o.OrderItems.Count - 2) more item(s)</div>
+                                    }
+                                </div>
+
+                                <!-- Order Footer -->
+                                <div class="d-flex justify-content-between align-items-center p-3 border-top bg-white">
+                                    <div>
+                                        <span class="text-muted small me-2">@o.PaymentMethod</span>
+                                        <span class="fw-bold">Total: ₱@o.TotalAmount.ToString("N0")</span>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        @if (o.Status == OrderStatus.ToPay)
+                                        {
+                                            <a href="/Customer/Pay?orderId=@o.Id" class="btn btn-warning btn-sm fw-semibold">
+                                                <i class="fas fa-credit-card me-1"></i>Pay Now
+                                            </a>
+                                            <form asp-action="CancelOrder" method="post" class="d-inline">
+                                                <input type="hidden" name="orderId" value="@o.Id" />
+                                                <button class="btn btn-outline-danger btn-sm"
+                                                        onclick="return confirm('Cancel this order?')">
+                                                    Cancel
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (o.Status == OrderStatus.ToReceive)
+                                        {
+                                            <button class="btn btn-success btn-sm fw-semibold" data-bs-toggle="modal"
+                                                    data-bs-target="#returnModal" data-orderid="@o.Id">
+                                                <i class="fas fa-undo me-1"></i>Return
+                                            </button>
+                                        }
+                                        @if (o.Status == OrderStatus.ToReview)
+                                        {
+                                            <a href="/Customer/ProductDetail/@o.OrderItems.FirstOrDefault()?.ProductId" class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-star me-1"></i>Write Review
+                                            </a>
+                                        }
+                                        <a href="/Customer/OrderDetail/@o.Id" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye me-1"></i>Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Return Modal -->
+<div class="modal fade" id="returnModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header border-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold"><i class="fas fa-undo text-warning me-2"></i>Request Return / Refund</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="RequestReturn" method="post">
+                <div class="modal-body px-4">
+                    <input type="hidden" name="orderId" id="returnOrderId" />
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Reason for Return</label>
+                        <textarea name="reason" class="form-control" rows="4"
+                                  placeholder="Please describe the issue (e.g. defective product, wrong item, etc.)" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning fw-semibold">Submit Return Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('returnModal')?.addEventListener('show.bs.modal', function(e) {
+            const btn = e.relatedTarget;
+            document.getElementById('returnOrderId').value = btn.dataset.orderid;
+        });
+    </script>
+}

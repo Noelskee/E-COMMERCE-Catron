@@ -1,0 +1,170 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model ProductFormViewModel
+@{ ViewData["Title"] = Model.Id == 0 ? "Add Product" : "Edit Product"; Layout = "~/Views/Shared/_AdminLayout.cshtml"; }
+
+<link href="~/css/ProductForm.css" rel="stylesheet" />
+<div class="d-flex align-items-center gap-3 mt-3 mb-4">
+    <a href="/Admin/Products" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Back
+    </a>
+    <h5 class="fw-bold mb-0">
+        @(Model.Id == 0 ? "Add New Product" : "Edit Product")
+    </h5>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <form asp-action="ProductForm" asp-controller="Admin" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 small mb-3"></div>
+
+                    <div class="row g-3">
+                        <!-- Product Name -->
+                        <div class="col-12">
+                            <label asp-for="Name" class="form-label fw-semibold small">Product Name <span class="text-danger">*</span></label>
+                            <input asp-for="Name" class="form-control" placeholder="e.g. Lenovo IdeaPad 3 15.6 inch" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Brand & Category -->
+                        <div class="col-md-6">
+                            <label asp-for="Brand" class="form-label fw-semibold small">Brand</label>
+                            <input asp-for="Brand" class="form-control" placeholder="e.g. Lenovo, HP, ASUS" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CategoryId" class="form-label fw-semibold small">Category <span class="text-danger">*</span></label>
+                            <select asp-for="CategoryId" class="form-select">
+                                <option value="">-- Select Category --</option>
+                                @foreach (var cat in Model.Categories)
+                                {
+                                    <option value="@cat.Id" @@(Model.CategoryId == cat.Id ? "selected" : "")>@cat.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Price & Discount -->
+                        <div class="col-md-6">
+                            <label asp-for="Price" class="form-label fw-semibold small">Regular Price (₱) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">₱</span>
+                                <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
+                            </div>
+                            <span asp-validation-for="Price" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DiscountPrice" class="form-label fw-semibold small">Discount Price (₱) <span class="text-muted fw-normal">(optional)</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light">₱</span>
+                                <input asp-for="DiscountPrice" class="form-control" type="number" step="0.01" min="0" placeholder="Leave blank if no discount" />
+                            </div>
+                        </div>
+
+                        <!-- Stock -->
+                        <div class="col-md-6">
+                            <label asp-for="Stock" class="form-label fw-semibold small">Stock Quantity</label>
+                            <input asp-for="Stock" class="form-control" type="number" min="0" placeholder="0" />
+                        </div>
+
+                        <!-- Image URL -->
+                        <div class="col-md-6">
+                            <label asp-for="ImageUrl" class="form-label fw-semibold small">Image URL</label>
+                            <input asp-for="ImageUrl" class="form-control" placeholder="https://..." id="imgUrlInput" oninput="previewImg()" />
+                            <small class="text-muted">Paste a product image URL</small>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label fw-semibold small">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"
+                                      placeholder="Detailed product description, specs, features..."></textarea>
+                        </div>
+
+                        <!-- Active Toggle -->
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" id="isActiveSwitch" />
+                                <label asp-for="IsActive" class="form-check-label fw-semibold small" for="isActiveSwitch">
+                                    Product is Active (visible to customers)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="col-12 d-flex gap-2 mt-2">
+                            <button type="submit" class="btn btn-primary fw-semibold px-4">
+                                <i class="fas fa-save me-2"></i>@(Model.Id == 0 ? "Add Product" : "Save Changes")
+                            </button>
+                            <a href="/Admin/Products" class="btn btn-outline-secondary px-4">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Panel -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <h6 class="fw-bold">Image Preview</h6>
+            </div>
+            <div class="card-body p-4 text-center">
+                <div id="imgPreviewWrap" style="width:100%;height:200px;background:#f8f9fa;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:1rem;">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img id="imgPreview" src="@Model.ImageUrl" style="max-width:100%;max-height:100%;object-fit:contain;" />
+                    }
+                    else
+                    {
+                        <div id="imgPlaceholder">
+                            <i class="fas fa-image text-muted" style="font-size:3rem;"></i>
+                            <p class="text-muted small mt-2">Paste image URL to preview</p>
+                        </div>
+                    }
+                </div>
+                <small class="text-muted">The image will be displayed as shown on the product card.</small>
+            </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="card border-0 bg-info bg-opacity-10 border-info rounded-4 mt-3">
+            <div class="card-body p-4">
+                <h6 class="fw-semibold text-info mb-2"><i class="fas fa-lightbulb me-2"></i>Tips</h6>
+                <ul class="small text-muted mb-0 ps-3">
+                    <li>Discount price must be lower than regular price</li>
+                    <li>Stock set to 0 shows "Out of Stock" to customers</li>
+                    <li>Inactive products are hidden from the storefront</li>
+                    <li>Use direct image URLs (JPG/PNG/WebP)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function previewImg() {
+    const url = document.getElementById('imgUrlInput').value;
+    const wrap = document.getElementById('imgPreviewWrap');
+    const placeholder = document.getElementById('imgPlaceholder');
+    let img = document.getElementById('imgPreview');
+
+    if (url) {
+        if (!img) {
+            img = document.createElement('img');
+            img.id = 'imgPreview';
+            img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;';
+            wrap.innerHTML = '';
+            wrap.appendChild(img);
+        }
+        img.src = url;
+        img.onerror = () => { wrap.innerHTML = '<p class="text-danger small">Invalid image URL</p>'; };
+    } else {
+        wrap.innerHTML = '<div id="imgPlaceholder"><i class="fas fa-image text-muted" style="font-size:3rem;"></i><p class="text-muted small mt-2">Paste image URL to preview</p></div>';
+    }
+}
+</script>
+}

@@ -1,0 +1,728 @@
+﻿/* ═══════════════════════════════════════════════════════════════════
+   CATRON COMPUTER TECHNOLOGY — Customer Auth
+   Pages  : Login.cshtml · Register.cshtml
+   Aesthetic: Luxury-refined forest green · deep gradients · glass feel
+   CPU-safe: all animations use only transform + opacity (GPU composited)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Keyframes (GPU-safe) ─────────────────────────────────────────── */
+@keyframes c-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(28px) scale(.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes c-logo-pop {
+    0% {
+        opacity: 0;
+        transform: scale(.55) rotate(-15deg);
+    }
+
+    70% {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes c-field-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes c-orb-a {
+    0%,100% {
+        transform: translate(0,0) scale(1);
+    }
+
+    50% {
+        transform: translate(22px,-26px) scale(1.07);
+    }
+}
+
+@keyframes c-orb-b {
+    0%,100% {
+        transform: translate(0,0) scale(1);
+    }
+
+    50% {
+        transform: translate(-18px,20px) scale(.94);
+    }
+}
+
+@keyframes c-orb-c {
+    0%,100% {
+        transform: translate(0,0);
+    }
+
+    50% {
+        transform: translate(12px,16px);
+    }
+}
+
+@keyframes c-ring {
+    0%,100% {
+        opacity: .55;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: .2;
+        transform: scale(1.14);
+    }
+}
+
+@keyframes c-shimmer {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes c-strength {
+    from {
+        transform: scaleX(0);
+    }
+
+    to {
+        transform: scaleX(1);
+    }
+}
+
+@keyframes c-check-pop {
+    0% {
+        transform: scale(0) rotate(-20deg);
+        opacity: 0;
+    }
+
+    70% {
+        transform: scale(1.2) rotate(5deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+/* ─── Page wrapper ─────────────────────────────────────────────────── */
+.c-auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1rem;
+    position: relative;
+    overflow: hidden;
+    /* rich layered background */
+    background: radial-gradient(ellipse 80% 60% at 110% -10%, rgba(22,163,74,.13) 0%, transparent 55%), radial-gradient(ellipse 60% 70% at -10% 110%, rgba(74,222,128,.09) 0%, transparent 55%), linear-gradient(160deg, #f0fdf4 0%, #ffffff 55%, #f0fdf4 100%);
+}
+
+    /* Subtle dot-grid texture */
+    .c-auth-page::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(22,163,74,.12) 1px, transparent 1px);
+        background-size: 28px 28px;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+/* ─── Floating orbs ────────────────────────────────────────────────── */
+.c-orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: transform;
+    z-index: 0;
+}
+
+.c-orb-1 {
+    width: 580px;
+    height: 580px;
+    top: -200px;
+    right: -180px;
+    background: radial-gradient(circle, rgba(34,197,94,.11) 0%, transparent 65%);
+    animation: c-orb-a 10s ease-in-out infinite;
+}
+
+.c-orb-2 {
+    width: 440px;
+    height: 440px;
+    bottom: -160px;
+    left: -130px;
+    background: radial-gradient(circle, rgba(74,222,128,.09) 0%, transparent 65%);
+    animation: c-orb-b 13s ease-in-out infinite;
+}
+
+.c-orb-3 {
+    width: 260px;
+    height: 260px;
+    top: 38%;
+    left: 25%;
+    background: radial-gradient(circle, rgba(22,163,74,.07) 0%, transparent 65%);
+    animation: c-orb-c 16s ease-in-out infinite;
+}
+
+/* ─── Card ─────────────────────────────────────────────────────────── */
+.c-auth-card {
+    background: rgba(255,255,255,.96);
+    border: 1.5px solid rgba(226,232,240,.9);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.1), 0 4px 16px rgba(0,0,0,.05), inset 0 1px 0 rgba(255,255,255,.9);
+    padding: 3rem 2.6rem 2.6rem;
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    z-index: 1;
+    animation: c-card-in .5s cubic-bezier(.34,1.28,.64,1) both;
+}
+
+.c-auth-card--wide {
+    max-width: 540px;
+}
+
+/* Glowing top border */
+.c-auth-card::before {
+    content: '';
+    position: absolute;
+    top: -1.5px;
+    left: 15%;
+    right: 15%;
+    height: 3px;
+    border-radius: 0 0 6px 6px;
+    background: linear-gradient(90deg, var(--g400,#22c55e), var(--g300,#4ade80), var(--g500,#16a34a));
+}
+
+/* ─── Brand strip ──────────────────────────────────────────────────── */
+.c-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    margin-bottom: 1.6rem;
+    text-decoration: none;
+}
+
+.c-brand-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #22c55e, #14532d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: .7rem;
+}
+
+.c-brand-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: .78rem;
+    font-weight: 900;
+    color: #475569;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+/* ─── Logo circle ──────────────────────────────────────────────────── */
+.c-logo {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e 0%, #14532d 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.8rem;
+    margin: 0 auto 1.5rem;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(22,163,74,.32);
+    animation: c-logo-pop .5s cubic-bezier(.34,1.56,.64,1) .05s both;
+    will-change: transform, opacity;
+}
+    /* Pulsing ring */
+    .c-logo::after {
+        content: '';
+        position: absolute;
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        border: 2px solid rgba(34,197,94,.3);
+        animation: c-ring 5s ease-in-out 1s infinite;
+        will-change: transform, opacity;
+    }
+
+/* ─── Headings ─────────────────────────────────────────────────────── */
+.c-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 900;
+    color: #0f172a;
+    text-align: center;
+    line-height: 1.15;
+    margin-bottom: .4rem;
+}
+
+.c-subtitle {
+    text-align: center;
+    color: #64748b;
+    font-size: .88rem;
+    margin-bottom: 2rem;
+    line-height: 1.55;
+}
+
+/* ─── Validation errors ────────────────────────────────────────────── */
+.c-errors {
+    background: #fff5f5;
+    border: 1px solid #fecaca;
+    border-left: 3px solid #dc2626;
+    color: #b91c1c;
+    border-radius: 10px;
+    padding: .7rem 1rem;
+    font-size: .82rem;
+    margin-bottom: 1.2rem;
+}
+
+    .c-errors ul {
+        padding-left: 1.1rem;
+        margin: 0;
+    }
+
+/* ─── Two-column row ───────────────────────────────────────────────── */
+.c-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 0;
+}
+
+@media (max-width: 480px) {
+    .c-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ─── Field wrapper ────────────────────────────────────────────────── */
+.c-field {
+    margin-bottom: 1.1rem;
+    opacity: 0;
+    animation: c-field-in .35s ease both;
+}
+    /* staggered reveal */
+    .c-field:nth-child(1) {
+        animation-delay: .08s;
+    }
+
+    .c-field:nth-child(2) {
+        animation-delay: .13s;
+    }
+
+    .c-field:nth-child(3) {
+        animation-delay: .18s;
+    }
+
+    .c-field:nth-child(4) {
+        animation-delay: .23s;
+    }
+
+    .c-field:nth-child(5) {
+        animation-delay: .28s;
+    }
+
+    .c-field:nth-child(6) {
+        animation-delay: .33s;
+    }
+
+    .c-field:nth-child(7) {
+        animation-delay: .38s;
+    }
+
+/* ─── Label row ────────────────────────────────────────────────────── */
+.c-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .44rem;
+}
+
+.c-label {
+    font-size: .73rem;
+    font-weight: 800;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: .055em;
+}
+
+.c-label-link {
+    font-size: .79rem;
+    color: #16a34a;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    transition: color .2s;
+}
+
+    .c-label-link:hover {
+        color: #15803d;
+        text-decoration: underline;
+    }
+
+/* ─── Input wrap ───────────────────────────────────────────────────── */
+.c-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.c-ico {
+    position: absolute;
+    left: .9rem;
+    color: #94a3b8;
+    font-size: .88rem;
+    pointer-events: none;
+    transition: color .18s;
+    z-index: 1;
+}
+
+.c-input {
+    width: 100%;
+    padding: .74rem 1rem .74rem 2.5rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 11px;
+    font-size: .9rem;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    color: #0f172a;
+    background: #f8fafc;
+    outline: none;
+    transition: border-color .18s, box-shadow .18s, background .18s;
+}
+
+    .c-input::placeholder {
+        color: #b0bec5;
+    }
+
+    .c-input:focus {
+        border-color: #16a34a;
+        background: #fff;
+        box-shadow: 0 0 0 3.5px rgba(22,163,74,.13);
+    }
+
+        .c-input:focus + .c-ico,
+        .c-input-wrap:focus-within .c-ico {
+            color: #16a34a;
+        }
+
+    /* Password field with eye button */
+    .c-input.c-has-eye {
+        padding-right: 2.6rem;
+    }
+
+.c-eye {
+    position: absolute;
+    right: .7rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: .88rem;
+    padding: .25rem;
+    line-height: 1;
+    transition: color .18s;
+    z-index: 2;
+}
+
+    .c-eye:hover {
+        color: #16a34a;
+    }
+
+/* Inline validation states */
+.c-input.valid {
+    border-color: #16a34a;
+    background: #f0fdf4;
+}
+
+.c-input.invalid {
+    border-color: #dc2626;
+}
+
+/* Field error text */
+.c-err {
+    display: block;
+    font-size: .76rem;
+    color: #dc2626;
+    margin-top: .3rem;
+}
+
+/* ─── Remember me ──────────────────────────────────────────────────── */
+.c-remember {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    margin-bottom: 1.5rem;
+}
+
+    .c-remember input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 4px;
+        accent-color: #16a34a;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .c-remember label {
+        font-size: .87rem;
+        color: #475569;
+        cursor: pointer;
+        user-select: none;
+    }
+
+/* ─── Submit button ────────────────────────────────────────────────── */
+.c-btn {
+    width: 100%;
+    padding: .85rem 1rem;
+    border: none;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #16a34a 0%, #14532d 100%);
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 6px 28px rgba(22,163,74,.3);
+    transition: transform .18s, box-shadow .18s;
+    margin-top: .3rem;
+}
+
+    .c-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 36px rgba(22,163,74,.38);
+    }
+
+    .c-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 18px rgba(22,163,74,.22);
+    }
+    /* Shimmer sweep — GPU-safe */
+    .c-btn::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.22) 50%, transparent 100%);
+        transform: translateX(-100%);
+        will-change: transform;
+        transition: transform .5s ease;
+    }
+
+    .c-btn:hover::after {
+        transform: translateX(100%);
+    }
+
+/* ─── OR divider ───────────────────────────────────────────────────── */
+.c-divider {
+    position: relative;
+    text-align: center;
+    margin: 1.6rem 0 1.3rem;
+    color: #94a3b8;
+    font-size: .78rem;
+}
+
+    .c-divider::before, .c-divider::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        height: 1px;
+        width: calc(50% - 22px);
+        background: #e2e8f0;
+    }
+
+    .c-divider::before {
+        left: 0;
+    }
+
+    .c-divider::after {
+        right: 0;
+    }
+
+/* ─── Footer links ─────────────────────────────────────────────────── */
+.c-footer-text {
+    text-align: center;
+    font-size: .88rem;
+    color: #64748b;
+    margin-bottom: .55rem;
+}
+
+    .c-footer-text a {
+        color: #16a34a;
+        font-weight: 700;
+        text-decoration: none;
+        transition: color .18s;
+    }
+
+        .c-footer-text a:hover {
+            color: #15803d;
+            text-decoration: underline;
+        }
+
+.c-admin-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .38rem;
+    font-size: .77rem;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: color .18s;
+    margin-top: .4rem;
+}
+
+    .c-admin-link:hover {
+        color: #475569;
+    }
+
+    .c-admin-link i {
+        font-size: .7rem;
+    }
+
+/* ─── Password strength bar ────────────────────────────────────────── */
+.c-strength {
+    margin-top: .5rem;
+}
+
+.c-strength-track {
+    height: 4px;
+    border-radius: 100px;
+    background: #e2e8f0;
+    overflow: hidden;
+    margin-bottom: .3rem;
+}
+
+.c-strength-fill {
+    height: 100%;
+    border-radius: 100px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .28s ease, background .28s ease;
+    will-change: transform;
+}
+
+    .c-strength-fill[data-level="0"] {
+        transform: scaleX(0);
+    }
+
+    .c-strength-fill[data-level="1"] {
+        transform: scaleX(.2);
+        background: #ef4444;
+    }
+
+    .c-strength-fill[data-level="2"] {
+        transform: scaleX(.45);
+        background: #f59e0b;
+    }
+
+    .c-strength-fill[data-level="3"] {
+        transform: scaleX(.7);
+        background: #eab308;
+    }
+
+    .c-strength-fill[data-level="4"] {
+        transform: scaleX(.88);
+        background: #22c55e;
+    }
+
+    .c-strength-fill[data-level="5"] {
+        transform: scaleX(1);
+        background: #15803d;
+    }
+
+.c-strength-hint {
+    font-size: .72rem;
+    color: #94a3b8;
+    transition: color .2s;
+}
+
+/* ─── "What you get" feature chips on register ─────────────────────── */
+.c-perks {
+    display: flex;
+    gap: .6rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 1.8rem;
+}
+
+.c-perk {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .73rem;
+    font-weight: 600;
+    color: #16a34a;
+    background: rgba(22,163,74,.09);
+    border: 1px solid rgba(22,163,74,.2);
+    border-radius: 100px;
+    padding: .28rem .75rem;
+}
+
+    .c-perk i {
+        font-size: .65rem;
+    }
+
+/* ─── Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 520px) {
+    .c-auth-card {
+        padding: 2.2rem 1.4rem 2rem;
+    }
+
+    .c-auth-card--wide {
+        padding: 2.2rem 1.4rem 2rem;
+    }
+
+    .c-title {
+        font-size: 1.45rem;
+    }
+
+    .c-logo {
+        width: 62px;
+        height: 62px;
+        font-size: 1.5rem;
+    }
+}
+
+/* ─── Reduced-motion: kill everything ──────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .c-auth-card, .c-logo, .c-logo::after,
+    .c-field, .c-orb, .c-btn::after,
+    .c-strength-fill, .c-ring {
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}

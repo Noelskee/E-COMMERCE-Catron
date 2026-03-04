@@ -1,0 +1,111 @@
+@model Order
+@{
+    ViewData["Title"] = "Order Receipt";
+}
+
+<div class="container py-4" style="max-width:650px">
+    <!-- Success Banner -->
+    <div class="receipt-header text-center rounded-4 mb-4 p-4">
+        <div class="success-checkmark mb-3"><i class="fas fa-check-circle"></i></div>
+        <h3 class="fw-bold text-white mb-1">Order Confirmed!</h3>
+        <p class="text-white-75 mb-0">Thank you for shopping at Catron Computer Technology</p>
+    </div>
+
+    <!-- Receipt Card -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h6 class="fw-bold mb-0">Order #@Model.OrderNumber</h6>
+                    <small class="text-muted">@Model.CreatedAt.ToString("MMMM dd, yyyy h:mm tt")</small>
+                </div>
+                <span class="badge bg-success px-3 py-2">@Model.Status</span>
+            </div>
+
+            <hr />
+            <h6 class="fw-bold mb-3">Items Ordered</h6>
+            @foreach (var item in Model.OrderItems)
+            {
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <div>
+                        <span>@item.Product?.Name</span>
+                        <span class="text-muted small ms-2">×@item.Quantity</span>
+                    </div>
+                    <span class="fw-semibold">₱@item.Subtotal.ToString("N0")</span>
+                </div>
+            }
+            <div class="d-flex justify-content-between pt-3 fw-bold fs-5">
+                <span>Total Paid</span>
+                <span class="text-primary">₱@Model.TotalAmount.ToString("N0")</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shipping + Payment Info -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-map-marker-alt text-primary me-2"></i>Ship To</h6>
+                    <p class="fw-semibold mb-1">@Model.ShippingFullName</p>
+                    <p class="text-muted small mb-1">@Model.ShippingAddress</p>
+                    <p class="text-muted small mb-0">@Model.ShippingPhone</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-wallet text-warning me-2"></i>Payment</h6>
+                    <p class="mb-1"><i class="fas fa-credit-card text-muted me-2"></i>@Model.PaymentMethod</p>
+                    <p class="mb-0"><span class="badge bg-success">Paid</span></p>
+                    @if (!string.IsNullOrEmpty(Model.GCashReference))
+                    {
+                        <p class="mt-2 small text-muted mb-0">Ref: @Model.GCashReference</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Number -->
+    @if (Model.Receipt != null)
+    {
+        <div class="card border-0 border-success shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold text-success mb-2"><i class="fas fa-receipt me-2"></i>Official Receipt</h6>
+                <div class="row g-2 small">
+                    <div class="col-6"><span class="text-muted">Receipt #:</span> <strong>@Model.Receipt.ReceiptNumber</strong></div>
+                    <div class="col-6"><span class="text-muted">Issued:</span> <strong>@Model.Receipt.IssuedAt.ToString("MMM dd, yyyy")</strong></div>
+                    <div class="col-6"><span class="text-muted">Amount:</span> <strong>₱@Model.Receipt.AmountPaid.ToString("N0")</strong></div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Tracking -->
+    @if (Model.DeliveryTrackings.Any())
+    {
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3"><i class="fas fa-truck text-primary me-2"></i>Delivery Update</h6>
+                @foreach (var t in Model.DeliveryTrackings.OrderByDescending(x => x.TrackingTime).Take(1))
+                {
+                    <div class="d-flex gap-3">
+                        <div class="tracking-dot-sm bg-primary"></div>
+                        <div><strong>@t.Status</strong><p class="text-muted small mb-0">@t.Notes</p></div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="d-flex gap-3">
+        <a href="/Customer/MyOrders" class="btn btn-primary flex-grow-1 fw-semibold">
+            <i class="fas fa-box-open me-2"></i>View My Orders
+        </a>
+        <a href="/Customer/Products" class="btn btn-outline-secondary flex-grow-1">
+            <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+        </a>
+    </div>
+</div>

@@ -1,0 +1,99 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model CustomerLoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+@section Styles {
+    <link href="/css/AuthCustomer.css" rel="stylesheet" />
+}
+
+<div class="c-auth-page">
+    <div class="c-orb c-orb-1"></div>
+    <div class="c-orb c-orb-2"></div>
+    <div class="c-orb c-orb-3"></div>
+
+    <div class="c-auth-card">
+
+        <a href="/Customer/Index" class="c-brand">
+            <span class="c-brand-icon"><i class="fas fa-microchip"></i></span>
+            <span class="c-brand-name">Catron Computer Technology</span>
+        </a>
+
+        <div class="c-logo"><i class="fas fa-user"></i></div>
+
+        <h1 class="c-title">Welcome Back!</h1>
+        <p class="c-subtitle">Sign in to your Catron account</p>
+
+        <form asp-action="Login" method="post" novalidate>
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+            <div asp-validation-summary="ModelOnly" class="c-errors"></div>
+
+            <div class="c-field">
+                <div class="c-label-row">
+                    <label class="c-label" asp-for="Email">Email Address</label>
+                </div>
+                <div class="c-input-wrap">
+                    <i class="fas fa-envelope c-ico"></i>
+                    <input asp-for="Email" class="c-input" placeholder="you@email.com" autocomplete="email" type="email" />
+                </div>
+                <span asp-validation-for="Email" class="c-err"></span>
+            </div>
+
+            <div class="c-field">
+                <div class="c-label-row">
+                    <label class="c-label" asp-for="Password">Password</label>
+                    <a href="/Customer/ForgotPassword" class="c-label-link">Forgot password?</a>
+                </div>
+                <div class="c-input-wrap">
+                    <i class="fas fa-lock c-ico"></i>
+                    <input asp-for="Password" type="password" id="loginPwd"
+                           class="c-input c-has-eye" placeholder="••••••••"
+                           autocomplete="current-password" />
+                    <button type="button" class="c-eye" id="loginEyeBtn" aria-label="Toggle password">
+                        <i class="fas fa-eye" id="loginEyeIcon"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="Password" class="c-err"></span>
+            </div>
+
+            <div class="c-remember">
+                <input asp-for="RememberMe" type="checkbox" id="rememberMe" />
+                <label for="rememberMe">Remember me on this device</label>
+            </div>
+
+            <button type="submit" class="c-btn">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </button>
+        </form>
+
+        <div class="c-divider">or</div>
+        <p class="c-footer-text">Don't have an account? <a href="/Customer/Register">Create one free</a></p>
+        <a href="/Admin/Login" class="c-admin-link"><i class="fas fa-shield-alt"></i> Admin Portal</a>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            'use strict';
+            var pwd = document.getElementById('loginPwd');
+            var btn = document.getElementById('loginEyeBtn');
+            var ico = document.getElementById('loginEyeIcon');
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    var show = pwd.type === 'password';
+                    pwd.type = show ? 'text' : 'password';
+                    ico.className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
+                });
+            }
+            document.querySelectorAll('.c-input').forEach(function (el) {
+                el.addEventListener('blur', function () {
+                    el.classList.remove('valid', 'invalid');
+                    if (el.value.trim()) el.classList.add(el.checkValidity() ? 'valid' : 'invalid');
+                });
+            });
+        })();
+    </script>
+}

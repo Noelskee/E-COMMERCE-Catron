@@ -1,0 +1,172 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard"; Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@functions {
+    string SC(OrderStatus s) => s switch
+    {
+        OrderStatus.ToPay => "amber",
+        OrderStatus.ToShip => "blue",
+        OrderStatus.ToReceive => "blue",
+        OrderStatus.Completed => "green",
+        OrderStatus.Cancelled => "red",
+        _ => "muted"
+    };
+}
+
+<!-- Stats -->
+<div class="stat-grid mt-1">
+    <div class="stat-card stat-green">
+        <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+        <div><div class="stat-value">@Model.TotalOrders</div><div class="stat-label">Total Orders</div></div>
+    </div>
+    <div class="stat-card stat-orange">
+        <div class="stat-icon"><i class="fas fa-peso-sign"></i></div>
+        <div>
+            <div class="stat-value">₱@(Model.TotalRevenue >= 1000 ? (Model.TotalRevenue / 1000m).ToString("N1") + "K" : Model.TotalRevenue.ToString("N0"))</div>
+            <div class="stat-label">Total Revenue</div>
+        </div>
+    </div>
+    <div class="stat-card stat-blue">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div><div class="stat-value">@Model.TotalCustomers</div><div class="stat-label">Customers</div></div>
+    </div>
+    <div class="stat-card stat-purple">
+        <div class="stat-icon"><i class="fas fa-box"></i></div>
+        <div><div class="stat-value">@Model.TotalProducts</div><div class="stat-label">Products</div></div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Recent Orders -->
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-head">
+                <h3>
+                    <i class="fas fa-shopping-bag" style="color:var(--g400)"></i>Recent Orders
+                    <span class="live-dot ms-2"></span>
+                </h3>
+                <a href="/Admin/Orders" class="head-link">View All →</a>
+            </div>
+            @if (!Model.RecentOrders.Any())
+            {
+                <div class="empty-state"><i class="fas fa-inbox"></i><p>No orders yet.</p></div>
+            }
+            else
+            {
+                <table class="data-table">
+                    <thead><tr><th>Order #</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th><th></th></tr></thead>
+                    <tbody>
+                        @foreach (var o in Model.RecentOrders)
+                        {
+                            <tr>
+                                <td><span class="tbl-link">#@o.OrderNumber</span></td>
+                                <td>
+                                    <div style="font-weight:700;color:var(--txt);font-size:.85rem">@o.Customer?.FullName</div>
+                                    <div style="font-size:.72rem;color:var(--muted)">@o.Customer?.Email</div>
+                                </td>
+                                <td>@o.OrderItems.Count pc(s)</td>
+                                <td style="font-weight:700;color:var(--g300)">₱@o.TotalAmount.ToString("N0")</td>
+                                <td><span class="badge badge-muted">@o.PaymentMethod</span></td>
+                                <td><span class="badge badge-@SC(o.Status)">@o.Status</span></td>
+                                <td style="color:var(--muted);font-size:.78rem">@o.CreatedAt.ToString("MMM dd")</td>
+                                <td><a href="/Admin/OrderDetail/@o.Id" class="btn-outline-sm">View</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <!-- Sidebar panels -->
+    <div class="col-lg-4">
+        <!-- Revenue breakdown -->
+        <div class="admin-card mb-0">
+            <div class="admin-card-head">
+                <h3><i class="fas fa-chart-bar" style="color:var(--g400)"></i>Revenue Breakdown</h3>
+            </div>
+            <div class="p-4">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:.82rem">
+                        <span style="color:var(--txt2)">Completed</span>
+                        <span style="color:var(--g400);font-weight:700">₱@Model.RecentOrders.Where(o => o.Status == OrderStatus.Completed).Sum(o => o.TotalAmount).ToString("N0")</span>
+                    </div>
+                    @{
+                        var compPct = Model.TotalRevenue > 0 ? (int)(Model.RecentOrders.Where(o => o.Status == OrderStatus.Completed).Sum(o => o.TotalAmount) / Model.TotalRevenue * 100) : 0;
+                    }
+                    <div class="progress-track"><div class="progress-fill" style="width:@compPct%;background:linear-gradient(90deg,var(--g500),var(--g400))"></div></div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:.82rem">
+                        <span style="color:var(--txt2)">Pending Payment</span>
+                        <span style="color:var(--amber);font-weight:700">₱@Model.RecentOrders.Where(o => o.Status == OrderStatus.ToPay).Sum(o => o.TotalAmount).ToString("N0")</span>
+                    </div>
+                    @{
+                        var pendPct = Model.TotalRevenue > 0 ? (int)(Model.RecentOrders.Where(o => o.Status == OrderStatus.ToPay).Sum(o => o.TotalAmount) / Model.TotalRevenue * 100) : 0;
+                    }
+                    <div class="progress-track"><div class="progress-fill" style="width:@pendPct%;background:linear-gradient(90deg,#d97706,var(--amber))"></div></div>
+                </div>
+
+                <hr style="border-color:var(--bdr);margin:1rem 0" />
+                <h6 style="font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:.8rem">Low Stock Alert</h6>
+                @if (!Model.LowStockProducts.Any())
+                {
+                    <div style="color:var(--muted);font-size:.83rem;text-align:center;padding:.5rem 0">All products well-stocked ✓</div>
+                }
+                else
+                {
+                    @foreach (var p in Model.LowStockProducts.Take(4))
+                    {
+                        <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom:1px solid var(--bdr)">
+                            <div style="font-size:.83rem;font-weight:600;color:var(--txt2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@p.Name</div>
+                            <span class="badge @(p.Stock == 0 ? "badge-red" : "badge-amber")">@p.Stock left</span>
+                        </div>
+                    }
+                    <a href="/Admin/Products" class="btn-outline-sm mt-3 w-100 justify-content-center">Manage Products →</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Logged In Customers (live) -->
+<div class="admin-card mt-4">
+    <div class="admin-card-head">
+        <h3><i class="fas fa-users" style="color:var(--blue)"></i>Recently Registered Customers</h3>
+        <a href="/Admin/Customers" class="head-link">View All →</a>
+    </div>
+    @if (!Model.RecentCustomers?.Any() ?? true)
+    {
+        <div class="empty-state"><i class="fas fa-user-slash"></i><p>No customers registered yet.</p></div>
+    }
+    else
+    {
+        <table class="data-table">
+            <thead><tr><th>Customer</th><th>Email</th><th>Phone</th><th>Orders</th><th>Spent</th><th>Joined</th><th>Status</th></tr></thead>
+            <tbody>
+                @foreach (var c in Model.RecentCustomers.Take(5))
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width:32px;height:32px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.75rem;flex-shrink:0">
+                                    @c.FirstName[0]@c.LastName[0]
+                                </div>
+                                <span style="font-weight:700;color:var(--txt);font-size:.85rem">@c.FullName</span>
+                            </div>
+                        </td>
+                        <td style="color:var(--muted);font-size:.82rem">@c.Email</td>
+                        <td style="color:var(--muted);font-size:.82rem">@(c.PhoneNumber ?? "—")</td>
+                        <td><span class="badge badge-green">@c.Orders.Count</span></td>
+                        <td style="font-weight:700;color:var(--g300)">₱@c.Orders.Sum(o => o.TotalAmount).ToString("N0")</td>
+                        <td style="color:var(--muted);font-size:.78rem">@c.CreatedAt.ToString("MMM dd, yyyy")</td>
+                        <td><span class="badge @(c.IsActive ? "badge-green" : "badge-red")">@(c.IsActive ? "Active" : "Inactive")</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

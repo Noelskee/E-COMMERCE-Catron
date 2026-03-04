@@ -1,0 +1,93 @@
+@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Products"; Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 style="font-family:'Outfit',sans-serif;font-weight:800;color:var(--txt);margin:0">Products</h5>
+        <small style="color:var(--muted)">@Model.Count() total · @Model.Count(p => p.Stock == 0) out of stock</small>
+    </div>
+    <a href="/Admin/ProductForm" class="btn-primary-sm"><i class="fas fa-plus"></i>Add Product</a>
+</div>
+
+<div class="toolbar mb-4">
+    <div class="search-box flex-grow-1">
+        <i class="fas fa-search"></i>
+        <input type="text" id="prodSearch" placeholder="Search products…" oninput="filterProd()" />
+    </div>
+</div>
+
+<div class="admin-card">
+    <table class="data-table" id="prodTable">
+        <thead>
+            <tr><th>Product</th><th>Category</th><th>Brand</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                <tr data-search="@p.Name @p.Brand @p.Category?.Name">
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width:48px;height:48px;border-radius:10px;background:var(--card2);
+                                            overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+                                @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                {
+                                    <img src="@p.ImageUrl" style="width:100%;height:100%;object-fit:contain;padding:4px" />
+                                }
+                                else
+                                {
+
+                                    <i class="@(p.Category?.IconClass ?? "fas fa-box")" style="color:var(--g400);font-size:.9rem"></i>
+                                }
+                            </div>
+                            <div>
+                                <div style="font-weight:700;color:var(--txt);font-size:.87rem">@p.Name</div>
+                                <div style="font-size:.72rem;color:var(--muted)">#@p.Id</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color:var(--txt2);font-size:.83rem">@p.Category?.Name</td>
+                    <td style="color:var(--muted);font-size:.83rem">@p.Brand</td>
+                    <td>
+                        <div style="font-weight:800;color:var(--g300);font-size:.87rem">₱@p.FinalPrice.ToString("N0")</div>
+                        @if (p.DiscountPrice.HasValue && p.DiscountPrice < p.Price)
+                        {
+                            <div style="color:var(--muted);text-decoration:line-through;font-size:.72rem">₱@p.Price.ToString("N0")</div>
+                        }
+                    </td>
+                    <td>
+                        <span class="badge @(p.Stock == 0 ? "badge-red" : p.Stock < 5 ? "badge-amber" : "badge-green")">
+                            @(p.Stock == 0 ? "Out of Stock" : p.Stock + " pcs")
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge @(p.IsActive ? "badge-green" : "badge-muted")">@(p.IsActive ? "Active" : "Inactive")</span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="/Admin/ProductForm/@p.Id" class="btn-outline-sm"><i class="fas fa-edit"></i>Edit</a>
+                            <form asp-action="ToggleProductStatus" method="post" class="d-inline">
+                                <input type="hidden" name="productId" value="@p.Id" />
+                                <button type="submit" class="@(p.IsActive ? "btn-danger-sm" : "btn-success-sm")">
+                                    @(p.IsActive ? "Deactivate" : "Activate")
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        function filterProd() {
+            const q = document.getElementById('prodSearch').value.toLowerCase();
+            document.querySelectorAll('#prodTable tbody tr').forEach(row => {
+                row.style.display = (row.dataset.search || row.textContent).toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+    </script>
+}

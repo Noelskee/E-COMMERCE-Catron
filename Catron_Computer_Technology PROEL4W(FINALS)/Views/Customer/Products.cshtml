@@ -1,0 +1,127 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model ProductListViewModel
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-3">
+                <h6 class="fw-bold mb-3"><i class="fas fa-search me-2 text-primary"></i>Search</h6>
+                <form action="/Customer/Products" method="get">
+                    <div class="input-group">
+                        <input class="form-control border-end-0" type="search" name="search" value="@Model.SearchQuery" placeholder="Search..." />
+                        <button class="btn btn-warning border" type="submit"><i class="fas fa-search"></i></button>
+                    </div>
+                    @if (Model.SelectedCategoryId.HasValue)
+                    {
+                        <input type="hidden" name="categoryId" value="@Model.SelectedCategoryId" />
+                    }
+                </form>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-3">
+                <h6 class="fw-bold mb-3"><i class="fas fa-th-large me-2 text-primary"></i>Categories</h6>
+                <a href="/Customer/Products" class="category-filter-link @(!Model.SelectedCategoryId.HasValue ? "active" : "")">
+                    <i class="fas fa-border-all me-2"></i>All Categories
+                    <span class="badge bg-secondary ms-auto">@Model.TotalItems</span>
+                </a>
+                @foreach (var cat in Model.Categories)
+                {
+                    <a href="/Customer/Products?categoryId=@cat.Id@(!string.IsNullOrEmpty(Model.SearchQuery) ? "&search=" + Model.SearchQuery : "")"
+                       class="category-filter-link @(Model.SelectedCategoryId == cat.Id ? "active" : "")">
+                        <i class="@cat.IconClass me-2"></i>@cat.Name
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0">@(Model.SelectedCategoryId.HasValue? Model.Categories.FirstOrDefault(c => c.Id == Model.SelectedCategoryId)?.Name ?? "Products" : "All Products")</h5>
+                    <small class="text-muted">@Model.TotalItems product(s) found</small>
+                </div>
+            </div>
+
+            @if (!Model.Products.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-search fs-1 text-muted mb-3"></i>
+                    <h5 class="text-muted">No products found.</h5>
+                    <a href="/Customer/Products" class="btn btn-outline-primary mt-2">View All Products</a>
+                </div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var p in Model.Products)
+                    {
+                        <div class="col-6 col-md-4">
+                            <div class="product-card h-100">
+                                <a href="/Customer/ProductDetail/@p.Id" class="text-decoration-none">
+                                    <div class="product-img-wrap">
+                                        @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                        {
+                                            <img src="@p.ImageUrl" class="product-img" alt="@p.Name" loading="lazy" />
+                                        }
+                                        else
+                                        {
+
+                                            <div class="product-img-placeholder"><i class="@(p.Category.IconClass ?? "fas fa-box")"></i></div>
+                                        }
+                                        @if (p.DiscountPercent.HasValue)
+                                        {
+                                            <span class="discount-badge">-@p.DiscountPercent%</span>
+                                        }
+                                        @if (p.Stock == 0)
+                                        {
+                                            <span class="out-of-stock-badge">Out of Stock</span>
+                                        }
+                                    </div>
+                                    <div class="product-body">
+                                        <div class="product-category small text-muted mb-1">@p.Category.Name</div>
+                                        <h6 class="product-name text-dark">@p.Name</h6>
+                                        <div class="small text-muted">@p.Brand</div>
+                                        <div class="product-price mt-2">
+                                            <span class="price-final">₱@p.FinalPrice.ToString("N0")</span>
+                                            @if (p.DiscountPrice.HasValue)
+                                            {
+                                                <span class="price-original ms-1 small">₱@p.Price.ToString("N0")</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </a>
+                                <div class="product-actions px-3 pb-3 d-flex gap-2">
+                                    <button onclick="addToCart(@p.Id)" class="btn btn-warning btn-sm flex-grow-1 fw-semibold" @(p.Stock == 0 ? "disabled" : "")>
+                                        <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                    </button>
+                                    <button onclick="toggleWishlist(@p.Id, this)" class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="/Customer/Products?page=@i@(Model.SelectedCategoryId.HasValue ? "&categoryId=" + Model.SelectedCategoryId : "")@(!string.IsNullOrEmpty(Model.SearchQuery) ? "&search=" + Model.SearchQuery : "")">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            }
+        </div>
+    </div>
+</div>

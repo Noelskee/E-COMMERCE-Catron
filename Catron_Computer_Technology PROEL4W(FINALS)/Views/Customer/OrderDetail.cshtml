@@ -1,0 +1,264 @@
+@model Order
+@{
+    ViewData["Title"] = "Order #" + Model.OrderNumber;
+}
+
+@functions {
+    string StatusColor(OrderStatus s) => s switch
+    {
+        OrderStatus.ToPay => "warning",
+        OrderStatus.ToShip => "info",
+        OrderStatus.ToReceive => "primary",
+        OrderStatus.ToReview => "success",
+        OrderStatus.Completed => "success",
+        OrderStatus.ReturnRefund => "secondary",
+        OrderStatus.Cancelled => "danger",
+        _ => "secondary"
+    };
+}
+
+<div class="container py-4">
+
+    <!-- Back + Heading -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="/Customer/MyOrders" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Back to Orders
+        </a>
+        <div>
+            <h4 class="fw-bold mb-0">Order #@Model.OrderNumber</h4>
+            <small class="text-muted">Placed on @Model.CreatedAt.ToString("MMMM dd, yyyy h:mm tt")</small>
+        </div>
+        <span class="badge bg-@StatusColor(Model.Status) px-3 py-2 ms-auto fs-6">@Model.Status</span>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Left Column -->
+        <div class="col-lg-8">
+
+            <!-- Items Ordered -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                    <h5 class="fw-bold"><i class="fas fa-shopping-bag text-primary me-2"></i>Items Ordered</h5>
+                </div>
+                <div class="card-body p-4">
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <div class="d-flex align-items-center gap-3 py-3 border-bottom">
+                            <div class="flex-shrink-0" style="width:60px;height:60px;background:#f8f9fa;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+                                @if (!string.IsNullOrEmpty(item.Product?.ImageUrl))
+                                {
+                                    <img src="@item.Product.ImageUrl" style="width:60px;height:60px;object-fit:cover" class="rounded-2" />
+                                }
+                                else
+                                {
+
+                                    <i class="fas fa-box text-muted"></i>
+                                }
+                            </div>
+                            <div class="flex-grow-1">
+                                <a href="/Customer/ProductDetail/@item.ProductId" class="fw-semibold text-dark text-decoration-none">
+                                    @item.Product?.Name
+                                </a>
+                                <div class="text-muted small">Qty: @item.Quantity &bull; ₱@item.UnitPrice.ToString("N0") each</div>
+                            </div>
+                            <div class="fw-bold text-end">₱@item.Subtotal.ToString("N0")</div>
+                        </div>
+                    }
+
+                    <!-- Totals -->
+                    <div class="pt-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Subtotal</span>
+                            <span>₱@Model.TotalAmount.ToString("N0")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Shipping Fee</span>
+                            <span class="text-success">Free</span>
+                        </div>
+                        <hr />
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Order Total</span>
+                            <span class="text-primary">₱@Model.TotalAmount.ToString("N0")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivery Tracking Timeline -->
+            @if (Model.DeliveryTrackings.Any())
+            {
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                        <h5 class="fw-bold"><i class="fas fa-truck text-info me-2"></i>Delivery Tracking</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="tracking-timeline">
+                            @foreach (var t in Model.DeliveryTrackings.OrderByDescending(x => x.TrackingTime))
+                            {
+                                <div class="tracking-step d-flex gap-3 mb-4">
+                                    <div class="tracking-dot-wrap d-flex flex-column align-items-center">
+                                        <div class="tracking-dot @(t == Model.DeliveryTrackings.OrderByDescending(x => x.TrackingTime).First() ? "active" : "")"></div>
+                                        <div class="tracking-line flex-grow-1"></div>
+                                    </div>
+                                    <div class="flex-grow-1 pb-3">
+                                        <div class="fw-semibold">@t.Status</div>
+                                        @if (!string.IsNullOrEmpty(t.Location))
+                                        {
+                                            <div class="text-muted small"><i class="fas fa-map-marker-alt me-1 text-danger"></i>@t.Location</div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(t.Notes))
+                                        {
+                                            <div class="text-muted small mt-1">@t.Notes</div>
+                                        }
+                                        <div class="text-muted small mt-1">
+                                            <i class="fas fa-clock me-1 text-primary"></i>@t.TrackingTime.ToString("MMM dd, yyyy h:mm tt")
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+
+            <!-- Shipping Info -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-map-marker-alt text-danger me-2"></i>Ship To</h6>
+                    <p class="fw-semibold mb-1">@Model.ShippingFullName</p>
+                    <p class="text-muted small mb-1">@Model.ShippingAddress</p>
+                    <p class="text-muted small mb-0">@Model.ShippingPhone</p>
+                </div>
+            </div>
+
+            <!-- Payment Info -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-wallet text-warning me-2"></i>Payment</h6>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Method</span>
+                        <strong class="small">@Model.PaymentMethod</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Status</span>
+                        <span class="badge bg-@(Model.PaymentStatus == PaymentStatus.Paid ? "success" : "warning")">@Model.PaymentStatus</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.GCashReference))
+                    {
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted small">GCash Ref</span>
+                            <strong class="small">@Model.GCashReference</strong>
+                        </div>
+                    }
+                    @if (Model.PaidAt.HasValue)
+                    {
+                        <div class="d-flex justify-content-between mt-2">
+                            <span class="text-muted small">Paid On</span>
+                            <strong class="small">@Model.PaidAt.Value.ToString("MMM dd, yyyy")</strong>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Receipt -->
+            @if (Model.Receipt != null)
+            {
+                <div class="card border-0 border-success shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold text-success mb-3"><i class="fas fa-receipt me-2"></i>Official Receipt</h6>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted small">Receipt #</span>
+                            <strong class="small">@Model.Receipt.ReceiptNumber</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted small">Issued</span>
+                            <strong class="small">@Model.Receipt.IssuedAt.ToString("MMM dd, yyyy")</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted small">Amount Paid</span>
+                            <strong class="small text-success">₱@Model.Receipt.AmountPaid.ToString("N0")</strong>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Actions -->
+            <div class="d-grid gap-2">
+                @if (Model.Status == OrderStatus.ToPay)
+                {
+                    <a href="/Customer/Pay?orderId=@Model.Id" class="btn btn-warning fw-semibold">
+                        <i class="fas fa-credit-card me-2"></i>Pay Now
+                    </a>
+                    <form asp-action="CancelOrder" method="post">
+                        <input type="hidden" name="orderId" value="@Model.Id" />
+                        <button class="btn btn-outline-danger w-100" onclick="return confirm('Cancel this order?')">
+                            <i class="fas fa-times me-2"></i>Cancel Order
+                        </button>
+                    </form>
+                }
+                @if (Model.Status == OrderStatus.ToReceive)
+                {
+                    <button class="btn btn-warning fw-semibold" data-bs-toggle="modal" data-bs-target="#returnModal">
+                        <i class="fas fa-undo me-2"></i>Request Return
+                    </button>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Return Modal -->
+<div class="modal fade" id="returnModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <div class="modal-header border-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold"><i class="fas fa-undo text-warning me-2"></i>Request Return / Refund</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="RequestReturn" method="post">
+                <div class="modal-body px-4">
+                    <input type="hidden" name="orderId" value="@Model.Id" />
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Reason for Return</label>
+                        <textarea name="reason" class="form-control" rows="4"
+                                  placeholder="Describe the issue..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning fw-semibold">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tracking-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #dee2e6;
+        flex-shrink: 0;
+        margin-top: 3px;
+    }
+
+        .tracking-dot.active {
+            background: var(--bs-primary);
+            box-shadow: 0 0 0 3px rgba(13,110,253,.2);
+        }
+
+    .tracking-line {
+        width: 2px;
+        background: #dee2e6;
+        min-height: 20px;
+        margin-top: 4px;
+    }
+</style>

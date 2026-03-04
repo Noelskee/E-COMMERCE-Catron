@@ -1,0 +1,88 @@
+@model IEnumerable<WishListItem>
+@{
+    ViewData["Title"] = "My Wishlist";
+}
+
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-lg-3">
+            @await Html.PartialAsync("_AccountSidebar", null as Customer,
+            new ViewDataDictionary(ViewData) { { "Active", "wishlist" } })
+        </div>
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-heart text-danger me-2"></i>My Wishlist
+                        <span class="badge bg-danger ms-2">@Model.Count()</span>
+                    </h5>
+                    <a href="/Customer/Products" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-shopping-bag me-1"></i>Continue Shopping
+                    </a>
+                </div>
+                <div class="card-body p-4">
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-heart-broken fs-1 text-muted mb-3 d-block"></i>
+                            <h6 class="text-muted">Your wishlist is empty.</h6>
+                            <a href="/Customer/Products" class="btn btn-danger btn-sm mt-2">
+                                <i class="fas fa-heart me-1"></i>Start Saving Items
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-3">
+                            @foreach (var item in Model)
+                            {
+                                <div class="col-6 col-md-4">
+                                    <div class="product-card h-100">
+                                        <a href="/Customer/ProductDetail/@item.ProductId" class="text-decoration-none">
+                                            <div class="product-img-wrap">
+                                                @if (!string.IsNullOrEmpty(item.Product?.ImageUrl))
+                                                {
+                                                    <img src="@item.Product.ImageUrl" class="product-img" alt="@item.Product?.Name" loading="lazy" />
+                                                }
+                                                else
+                                                {
+
+                                                    <div class="product-img-placeholder"><i class="@(item.Product?.Category?.IconClass ?? "fas fa-box")"></i></div>
+                                                }
+                                                @if (item.Product?.DiscountPercent.HasValue == true)
+                                                {
+                                                    <span class="discount-badge">-@item.Product.DiscountPercent%</span>
+                                                }
+                                            </div>
+                                            <div class="product-body">
+                                                <div class="small text-muted mb-1">@item.Product?.Category?.Name</div>
+                                                <h6 class="product-name text-dark">@item.Product?.Name</h6>
+                                                <div class="small text-muted">@item.Product?.Brand</div>
+                                                <div class="product-price mt-2">
+                                                    <span class="price-final">₱@item.Product?.FinalPrice.ToString("N0")</span>
+                                                    @if (item.Product?.DiscountPrice.HasValue == true)
+                                                    {
+                                                        <span class="price-original ms-1 small text-decoration-line-through text-muted">₱@item.Product.Price.ToString("N0")</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <div class="product-actions px-3 pb-3 d-flex gap-2">
+                                            <button onclick="addToCart(@item.ProductId)" class="btn btn-warning btn-sm flex-grow-1 fw-semibold"
+                                                    @(item.Product?.Stock == 0 ? "disabled" : "")>
+                                                <i class="fas fa-cart-plus me-1"></i>Add to Cart
+                                            </button>
+                                            <button onclick="toggleWishlist(@item.ProductId, this)" class="btn btn-danger btn-sm" title="Remove">
+                                                <i class="fas fa-heart"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

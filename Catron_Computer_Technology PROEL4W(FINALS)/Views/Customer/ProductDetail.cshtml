@@ -1,0 +1,185 @@
+@using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels
+@model ProductDetailViewModel
+@{
+    ViewData["Title"] = Model.Product.Name;
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/Customer/Index" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a href="/Customer/Products" class="text-decoration-none">Products</a></li>
+            <li class="breadcrumb-item"><a href="/Customer/Products?categoryId=@Model.Product.CategoryId" class="text-decoration-none">@Model.Product.Category.Name</a></li>
+            <li class="breadcrumb-item active">@Model.Product.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5 mb-5">
+        <!-- Product Image -->
+        <div class="col-lg-5">
+            <div class="product-detail-img-wrap rounded-4 shadow-sm">
+                @if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
+                {
+                    <img src="@Model.Product.ImageUrl" class="w-100 rounded-4" alt="@Model.Product.Name" />
+                }
+                else
+                {
+
+                    <div class="product-img-placeholder-lg rounded-4"><i class="@(Model.Product.Category.IconClass ?? "fas fa-box")"></i></div>
+                }
+                @if (Model.Product.DiscountPercent.HasValue)
+                {
+                    <span class="discount-badge-lg">-@Model.Product.DiscountPercent% OFF</span>
+                }
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-lg-7">
+            <div class="badge bg-primary-soft text-primary mb-2">@Model.Product.Category.Name</div>
+            <h2 class="fw-bold mb-1">@Model.Product.Name</h2>
+            <div class="text-muted mb-2">Brand: <strong>@Model.Product.Brand</strong></div>
+
+            @if (Model.AverageRating > 0)
+            {
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="fas fa-star @(i <= Model.AverageRating ? "text-warning" : "text-muted")"></i>
+                    }
+                    <span class="text-muted small">(@Model.Reviews.Count() reviews)</span>
+                </div>
+            }
+
+            <div class="price-display mb-4">
+                <span class="price-hero">₱@Model.Product.FinalPrice.ToString("N0")</span>
+                @if (Model.Product.DiscountPrice.HasValue && Model.Product.DiscountPrice < Model.Product.Price)
+                {
+                    <span class="price-original-hero ms-3 text-decoration-line-through text-muted">₱@Model.Product.Price.ToString("N0")</span>
+                    <span class="badge bg-danger ms-2">Save ₱@((Model.Product.Price - Model.Product.FinalPrice).ToString("N0"))</span>
+                }
+            </div>
+
+            <p class="text-muted mb-4">@Model.Product.Description</p>
+
+            <div class="mb-4">
+                <span class="fw-semibold">Stock: </span>
+                @if (Model.Product.Stock > 0)
+                {
+                    <span class="text-success fw-semibold"><i class="fas fa-check-circle me-1"></i>@Model.Product.Stock available</span>
+                }
+                else
+                {
+
+                    <span class="text-danger fw-semibold"><i class="fas fa-times-circle me-1"></i>Out of Stock</span>
+                }
+            </div>
+
+            <div class="d-flex gap-3 flex-wrap mb-4">
+                <div class="quantity-selector d-flex align-items-center gap-2">
+                    <button class="btn btn-outline-secondary btn-sm px-3" onclick="changeQty(-1)">−</button>
+                    <input type="number" id="qty" value="1" min="1" max="@Model.Product.Stock" class="form-control text-center qty-input" style="width:70px" />
+                    <button class="btn btn-outline-secondary btn-sm px-3" onclick="changeQty(1)">+</button>
+                </div>
+                <button onclick="addToCart(@Model.Product.Id, parseInt(document.getElementById('qty').value))"
+                        class="btn btn-warning btn-lg px-4 fw-semibold flex-grow-1" @(Model.Product.Stock == 0 ? "disabled" : "")>
+                    <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                </button>
+                <button onclick="toggleWishlist(@Model.Product.Id, this)"
+                        class="btn @(Model.IsInWishlist ? "btn-danger" : "btn-outline-danger") btn-lg px-3">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </div>
+
+            <div class="d-flex gap-4 flex-wrap text-muted small">
+                <span><i class="fas fa-shield-alt text-success me-1"></i>Genuine Product</span>
+                <span><i class="fas fa-truck text-primary me-1"></i>Fast Delivery</span>
+                <span><i class="fas fa-undo text-warning me-1"></i>7-Day Returns</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-4"><i class="fas fa-star text-warning me-2"></i>Customer Reviews</h5>
+
+                @if (!Model.Reviews.Any())
+                {
+                    <p class="text-muted text-center py-3">No reviews yet. Be the first to review!</p>
+                }
+                else
+                {
+                    @foreach (var r in Model.Reviews)
+                    {
+                        <div class="review-item border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>@r.Customer.FirstName @r.Customer.LastName[0].</strong>
+                                    <div class="d-flex mt-1">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fas fa-star @(i <= r.Rating ? "text-warning" : "text-muted") small"></i>
+                                        }
+                                    </div>
+                                </div>
+                                <small class="text-muted">@r.CreatedAt.ToString("MMM dd, yyyy")</small>
+                            </div>
+                            @if (!string.IsNullOrEmpty(r.Comment))
+                            {
+                                <p class="mt-2 mb-0 text-muted small">@r.Comment</p>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    @if (Model.RelatedProducts.Any())
+    {
+        <h5 class="fw-bold mb-3">Related Products</h5>
+        <div class="row g-3">
+            @foreach (var p in Model.RelatedProducts)
+            {
+                <div class="col-6 col-md-3">
+                    <div class="product-card h-100">
+                        <a href="/Customer/ProductDetail/@p.Id" class="text-decoration-none">
+                            <div class="product-img-wrap">
+                                @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                {
+                                    <img src="@p.ImageUrl" class="product-img" alt="@p.Name" />
+                                }
+                                else
+                                {
+
+                                    <div class="product-img-placeholder"><i class="@(p.Category.IconClass ?? "fas fa-box")"></i></div>
+                                }
+                            </div>
+                            <div class="product-body">
+                                <h6 class="product-name text-dark small">@p.Name</h6>
+                                <div class="price-final small">₱@p.FinalPrice.ToString("N0")</div>
+                            </div>
+                        </a>
+                        <div class="px-3 pb-3">
+                            <button onclick="addToCart(@p.Id)" class="btn btn-warning btn-sm w-100 fw-semibold"><i class="fas fa-cart-plus me-1"></i>Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function changeQty(n) {
+            const i = document.getElementById('qty');
+            const v = parseInt(i.value) + n;
+            i.value = Math.max(1, Math.min(v, parseInt(i.max)));
+        }
+    </script>
+}

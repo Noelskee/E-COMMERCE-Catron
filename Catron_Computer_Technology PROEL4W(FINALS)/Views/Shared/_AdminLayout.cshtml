@@ -1,0 +1,104 @@
+﻿@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " – " : "")Catron Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+    <link href="/css/admin.css" rel="stylesheet" />
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+
+    <nav class="sidebar">
+        <a class="sidebar-logo" href="/Admin/Dashboard">
+            <div class="s-logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div>
+                <div class="s-logo-name">Catron Admin</div>
+                <span class="s-logo-role">Management Portal</span>
+            </div>
+        </a>
+
+        <div class="nav-sec">
+            <div class="nav-lbl">Main</div>
+            <a class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")" href="/Admin/Dashboard">
+                <i class="fa-solid fa-gauge-high"></i><span>Dashboard</span>
+            </a>
+        </div>
+
+        <div class="nav-sec">
+            <div class="nav-lbl">Commerce</div>
+            <a class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Order") == true ? "active" : "")" href="/Admin/Orders">
+                <i class="fa-solid fa-box-open"></i><span>Orders</span>
+            </a>
+            <a class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Product") == true ? "active" : "")" href="/Admin/Products">
+                <i class="fa-solid fa-laptop"></i><span>Products</span>
+            </a>
+            <a class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Returns" ? "active" : "")" href="/Admin/Returns">
+                <i class="fa-solid fa-rotate-left"></i><span>Returns</span>
+            </a>
+        </div>
+
+        <div class="nav-sec">
+            <div class="nav-lbl">Users</div>
+            <a class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Customer") == true ? "active" : "")" href="/Admin/Customers">
+                <i class="fa-solid fa-users"></i><span>Customers</span>
+            </a>
+        </div>
+
+        <div class="nav-sec">
+            <div class="nav-lbl">System</div>
+            <a class="nav-item" href="/Customer/Index" target="_blank">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i><span>View Store</span>
+            </a>
+        </div>
+
+        <div class="sidebar-foot">
+            <div class="admin-chip">
+                <div class="admin-avatar">@(Context.Session.GetString("AdminUsername")?.Substring(0, 1).ToUpper() ?? "A")</div>
+                <div>
+                    <div class="admin-name">@Context.Session.GetString("AdminUsername")</div>
+                    <div class="admin-role">Administrator</div>
+                </div>
+            </div>
+            <a href="/Admin/Logout" class="logout-btn">
+                <i class="fa-solid fa-right-from-bracket"></i><span>Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-title">@(ViewData["Title"] ?? "Dashboard")</div>
+            <div class="topbar-right">
+                <span class="topbar-date" id="topbarDate"></span>
+                <div class="topbar-avatar">@(Context.Session.GetString("AdminUsername")?.Substring(0, 1).ToUpper() ?? "A")</div>
+            </div>
+        </div>
+        <div class="content-area">
+            @if (TempData["Success"] != null)
+            {
+                <div class="flash flash-ok"><i class="fa-solid fa-circle-check"></i>@TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="flash flash-err"><i class="fa-solid fa-circle-xmark"></i>@TempData["Error"]</div>
+            }
+            @if (TempData["Info"] != null)
+            {
+                <div class="flash flash-inf"><i class="fa-solid fa-circle-info"></i>@TempData["Info"]</div>
+            }
+            @RenderBody()
+        </div>
+    </div>
+
+    <script>
+        const d = new Date();
+        document.getElementById('topbarDate').textContent =
+            d.toLocaleDateString('en-PH',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
