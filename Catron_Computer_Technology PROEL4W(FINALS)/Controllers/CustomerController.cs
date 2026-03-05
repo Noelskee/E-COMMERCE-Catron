@@ -1,4 +1,4 @@
-﻿using Catron_Computer_Technology_PROEL4W_FINALS_.Data;
+using Catron_Computer_Technology_PROEL4W_FINALS_.Data;
 using Catron_Computer_Technology_PROEL4W_FINALS_.Helpers;
 using Catron_Computer_Technology_PROEL4W_FINALS_.Models;
 using Catron_Computer_Technology_PROEL4W_FINALS_.Models.ViewModels;
@@ -337,7 +337,7 @@ namespace Catron_Computer_Technology_PROEL4W_FINALS_.Controllers
         }
 
         // ══════════════════════════════════════════════════════════
-        //  PLACE ORDER  ← BUG FIX HERE
+        //  PLACE ORDER
         // ══════════════════════════════════════════════════════════
 
         [HttpPost]
@@ -442,7 +442,7 @@ namespace Catron_Computer_Technology_PROEL4W_FINALS_.Controllers
             {
                 Order = order,
                 SelectedMethod = order.PaymentMethod,
-                GCashNumber = order.Customer.PhoneNumber,
+                GCashNumber = "+63 912 345 6789", // Store GCash number
                 QrCodeBase64 = qr
             });
         }
@@ -553,20 +553,37 @@ namespace Catron_Computer_Technology_PROEL4W_FINALS_.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddAddress(CustomerAddress address)
+        public async Task<IActionResult> AddAddress(
+            string fullName, string address, string phoneNumber,
+            bool isDefault = false, bool isBillingDefault = false)
         {
             if (!IsLogged) return Guard();
-            address.CustomerId = CustId!.Value;
 
-            if (address.IsDefault)
+            if (string.IsNullOrWhiteSpace(fullName) ||
+                string.IsNullOrWhiteSpace(address) ||
+                string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                TempData["Error"] = "Full name, address, and phone number are required.";
+                return RedirectToAction("ManageAccount");
+            }
+
+            if (isDefault)
                 (await _db.CustomerAddresses.Where(a => a.CustomerId == CustId && a.IsDefault).ToListAsync())
                     .ForEach(a => a.IsDefault = false);
 
-            if (address.IsBillingDefault)
+            if (isBillingDefault)
                 (await _db.CustomerAddresses.Where(a => a.CustomerId == CustId && a.IsBillingDefault).ToListAsync())
                     .ForEach(a => a.IsBillingDefault = false);
 
-            _db.CustomerAddresses.Add(address);
+            _db.CustomerAddresses.Add(new CustomerAddress
+            {
+                CustomerId = CustId!.Value,
+                FullName = fullName.Trim(),
+                Address = address.Trim(),
+                PhoneNumber = phoneNumber.Trim(),
+                IsDefault = isDefault,
+                IsBillingDefault = isBillingDefault
+            });
             await _db.SaveChangesAsync();
             TempData["Success"] = "Address saved.";
             return RedirectToAction("ManageAccount");
