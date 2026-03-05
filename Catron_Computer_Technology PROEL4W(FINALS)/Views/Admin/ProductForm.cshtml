@@ -2,142 +2,336 @@
 @model ProductFormViewModel
 @{ ViewData["Title"] = Model.Id == 0 ? "Add Product" : "Edit Product"; Layout = "~/Views/Shared/_AdminLayout.cshtml"; }
 
-<link href="~/css/ProductForm.css" rel="stylesheet" />
-<div class="d-flex align-items-center gap-3 mt-3 mb-4">
-    <a href="/Admin/Products" class="btn btn-outline-secondary btn-sm">
-        <i class="fas fa-arrow-left me-1"></i>Back
-    </a>
-    <h5 class="fw-bold mb-0">
-        @(Model.Id == 0 ? "Add New Product" : "Edit Product")
-    </h5>
-</div>
+@section Styles {
+<style>
+/* ── ProductForm dark-green admin theme ── */
+.pf-wrap { max-width: 1100px; }
 
-<div class="row g-4">
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-4">
-                <form asp-action="ProductForm" asp-controller="Admin" method="post">
-                    <input type="hidden" asp-for="Id" />
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 small mb-3"></div>
+/* Page header */
+.pf-page-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 1.5rem; margin-bottom: 2rem;
+}
+.pf-page-title {
+    font-family: 'Outfit', sans-serif; font-size: 1.25rem;
+    font-weight: 800; color: var(--txt); margin: 0; letter-spacing: -.01em;
+}
 
-                    <div class="row g-3">
+/* Cards */
+.pf-card {
+    background: var(--card);
+    border: 1px solid var(--bdr);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+.pf-card-header {
+    padding: 1.25rem 1.5rem .85rem;
+    border-bottom: 1px solid var(--bdr);
+    display: flex; align-items: center; gap: .6rem;
+}
+.pf-card-header-icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: rgba(34,197,94,.12); display: flex;
+    align-items: center; justify-content: center;
+    color: var(--g400); font-size: .85rem;
+}
+.pf-card-title {
+    font-family: 'Outfit', sans-serif; font-size: .93rem;
+    font-weight: 700; color: var(--txt); margin: 0;
+}
+.pf-card-body { padding: 1.5rem; }
+
+/* Labels */
+.pf-label {
+    font-size: .75rem; font-weight: 700;
+    color: var(--txt2); margin-bottom: .35rem; display: block;
+    text-transform: uppercase; letter-spacing: .04em;
+}
+
+/* Inputs */
+.pf-input, .pf-select, .pf-textarea {
+    width: 100%; background: var(--card2);
+    border: 1px solid var(--bdr2); border-radius: 9px;
+    color: var(--txt); font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .88rem; padding: .6rem .85rem;
+    transition: border-color .18s, box-shadow .18s;
+    outline: none; appearance: none;
+}
+.pf-input::placeholder, .pf-textarea::placeholder { color: var(--muted); }
+.pf-input:hover, .pf-select:hover, .pf-textarea:hover { border-color: rgba(34,197,94,.3); }
+.pf-input:focus, .pf-select:focus, .pf-textarea:focus {
+    border-color: var(--g400);
+    box-shadow: 0 0 0 3px rgba(34,197,94,.15);
+    background: var(--card);
+}
+.pf-textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
+.pf-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%233d6b4a' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    padding-right: 36px; cursor: pointer;
+}
+.pf-select option { background: var(--card); color: var(--txt); }
+
+/* Input group (₱ prefix) */
+.pf-input-group { display: flex; }
+.pf-input-prefix {
+    padding: .6rem .85rem; background: var(--card2);
+    border: 1px solid var(--bdr2); border-right: none;
+    border-radius: 9px 0 0 9px; color: var(--g400);
+    font-weight: 800; font-size: .88rem; white-space: nowrap;
+    transition: border-color .18s;
+}
+.pf-input-group:focus-within .pf-input-prefix { border-color: var(--g400); }
+.pf-input-group .pf-input { border-radius: 0 9px 9px 0; border-left: none; }
+
+/* Toggle switch */
+.pf-toggle-row {
+    display: flex; align-items: center; gap: .85rem;
+    padding: .85rem 1.1rem; background: var(--card2);
+    border: 1px solid var(--bdr2); border-radius: 10px; cursor: pointer;
+    transition: border-color .18s, background .18s;
+}
+.pf-toggle-row:hover { border-color: rgba(34,197,94,.3); background: rgba(34,197,94,.04); }
+.form-check-input[type="checkbox"][role="switch"] {
+    width: 40px; height: 21px; background-color: var(--bdr2);
+    border: none; border-radius: 99px; cursor: pointer;
+    appearance: none; position: relative;
+    transition: background .2s; flex-shrink: 0;
+}
+.form-check-input[type="checkbox"][role="switch"]::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 15px; height: 15px; background: #fff;
+    border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.3);
+    transition: transform .2s;
+}
+.form-check-input[type="checkbox"][role="switch"]:checked { background-color: var(--g500); }
+.form-check-input[type="checkbox"][role="switch"]:checked::after { transform: translateX(19px); }
+.pf-toggle-label { font-size: .85rem; font-weight: 600; color: var(--txt); margin: 0; cursor: pointer; user-select: none; }
+
+/* Validation */
+.pf-val-error { font-size: .75rem; color: var(--red); margin-top: 4px; display: block; font-weight: 500; }
+.pf-alert-danger {
+    background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.25);
+    border-radius: 10px; color: #fca5a5; font-size: .83rem; padding: .7rem 1rem; margin-bottom: 1.2rem;
+}
+
+/* Buttons */
+.pf-btn-submit {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .65rem 1.5rem; background: var(--grad);
+    color: #fff; border: none; border-radius: 10px;
+    font-family: 'Outfit', sans-serif; font-size: .9rem;
+    font-weight: 700; cursor: pointer;
+    transition: transform .18s, box-shadow .18s;
+    box-shadow: var(--shd-green); letter-spacing: .01em; text-decoration: none;
+}
+.pf-btn-submit:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(22,163,74,.4); }
+
+.pf-btn-cancel {
+    display: inline-flex; align-items: center; padding: .65rem 1.2rem;
+    background: transparent; color: var(--txt2);
+    border: 1px solid var(--bdr2); border-radius: 10px;
+    font-size: .87rem; font-weight: 600; text-decoration: none;
+    transition: all .18s; cursor: pointer;
+}
+.pf-btn-cancel:hover { background: rgba(255,255,255,.04); color: var(--txt); border-color: rgba(34,197,94,.3); }
+
+/* Back button */
+.pf-btn-back {
+    display: inline-flex; align-items: center; gap: .45rem;
+    padding: .45rem .95rem; background: var(--card);
+    border: 1px solid var(--bdr2); border-radius: 9px;
+    color: var(--txt2); font-size: .83rem; font-weight: 600;
+    text-decoration: none; transition: all .18s;
+}
+.pf-btn-back:hover { color: var(--g400); border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.06); transform: translateX(-2px); }
+
+/* Image preview */
+.pf-img-wrap {
+    width: 100%; height: 200px;
+    background: var(--card2); border: 1.5px dashed var(--bdr2);
+    border-radius: 12px; display: flex; align-items: center;
+    justify-content: center; overflow: hidden; margin-bottom: .85rem;
+    transition: border-color .18s;
+}
+.pf-img-wrap:has(img) { border-style: solid; border-color: var(--bdr); }
+.pf-img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
+
+/* Tips card */
+.pf-tips {
+    background: rgba(34,197,94,.06); border: 1px solid rgba(34,197,94,.18);
+    border-radius: 12px; padding: 1.1rem 1.25rem; margin-top: 1rem;
+}
+.pf-tips-title {
+    font-family: 'Outfit', sans-serif; font-size: .82rem; font-weight: 700;
+    color: var(--g400); margin-bottom: .6rem; display: flex; align-items: center; gap: .5rem;
+}
+.pf-tips ul { list-style: none; padding: 0; margin: 0; }
+.pf-tips li {
+    font-size: .78rem; color: var(--txt2); padding: 3px 0;
+    display: flex; gap: .5rem; line-height: 1.5;
+}
+.pf-tips li::before { content: '→'; color: var(--g400); font-weight: 700; flex-shrink: 0; }
+
+/* Grid helpers */
+.pf-row { display: flex; flex-wrap: wrap; gap: 1rem; }
+.pf-col { flex: 1 1 220px; }
+.pf-col-full { flex: 1 1 100%; }
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { opacity: .4; }
+</style>
+}
+
+<div class="pf-wrap">
+    <!-- Page Header -->
+    <div class="pf-page-header">
+        <a href="/Admin/Products" class="pf-btn-back">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <h5 class="pf-page-title">
+            <i class="fas fa-@(Model.Id == 0 ? "plus-circle" : "pen-to-square") me-2" style="color:var(--g400)"></i>
+            @(Model.Id == 0 ? "Add New Product" : "Edit Product")
+        </h5>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Form Card -->
+        <div class="col-lg-8">
+            <div class="pf-card">
+                <div class="pf-card-header">
+                    <div class="pf-card-header-icon"><i class="fas fa-box-open"></i></div>
+                    <h6 class="pf-card-title">Product Details</h6>
+                </div>
+                <div class="pf-card-body">
+                    <form asp-action="ProductForm" asp-controller="Admin" method="post">
+                        <input type="hidden" asp-for="Id" />
+
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                        {
+                            <div class="pf-alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Please fix the errors below.
+                            </div>
+                        }
+
                         <!-- Product Name -->
-                        <div class="col-12">
-                            <label asp-for="Name" class="form-label fw-semibold small">Product Name <span class="text-danger">*</span></label>
-                            <input asp-for="Name" class="form-control" placeholder="e.g. Lenovo IdeaPad 3 15.6 inch" />
-                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        <div class="mb-3">
+                            <label class="pf-label">Product Name <span style="color:var(--red)">*</span></label>
+                            <input asp-for="Name" class="pf-input" placeholder="e.g. Lenovo IdeaPad 3 15.6 inch" />
+                            <span asp-validation-for="Name" class="pf-val-error"></span>
                         </div>
 
                         <!-- Brand & Category -->
-                        <div class="col-md-6">
-                            <label asp-for="Brand" class="form-label fw-semibold small">Brand</label>
-                            <input asp-for="Brand" class="form-control" placeholder="e.g. Lenovo, HP, ASUS" />
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="CategoryId" class="form-label fw-semibold small">Category <span class="text-danger">*</span></label>
-                            <select asp-for="CategoryId" class="form-select">
-                                <option value="">-- Select Category --</option>
-                                @foreach (var cat in Model.Categories)
-                                {
-                                    <option value="@cat.Id" @@(Model.CategoryId == cat.Id ? "selected" : "")>@cat.Name</option>
-                                }
-                            </select>
-                            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        <div class="pf-row mb-3">
+                            <div class="pf-col">
+                                <label class="pf-label">Brand</label>
+                                <input asp-for="Brand" class="pf-input" placeholder="e.g. Lenovo, HP, ASUS" />
+                            </div>
+                            <div class="pf-col">
+                                <label class="pf-label">Category <span style="color:var(--red)">*</span></label>
+                                <select asp-for="CategoryId" class="pf-select">
+                                    <option value="">-- Select Category --</option>
+                                    @foreach (var cat in Model.Categories)
+                                    {
+                                        <option value="@cat.Id" @@(Model.CategoryId == cat.Id ? "selected" : "")>@cat.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="CategoryId" class="pf-val-error"></span>
+                            </div>
                         </div>
 
                         <!-- Price & Discount -->
-                        <div class="col-md-6">
-                            <label asp-for="Price" class="form-label fw-semibold small">Regular Price (₱) <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light">₱</span>
-                                <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
+                        <div class="pf-row mb-3">
+                            <div class="pf-col">
+                                <label class="pf-label">Regular Price (₱) <span style="color:var(--red)">*</span></label>
+                                <div class="pf-input-group">
+                                    <span class="pf-input-prefix">₱</span>
+                                    <input asp-for="Price" class="pf-input" type="number" step="0.01" min="0" placeholder="0.00" />
+                                </div>
+                                <span asp-validation-for="Price" class="pf-val-error"></span>
                             </div>
-                            <span asp-validation-for="Price" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="DiscountPrice" class="form-label fw-semibold small">Discount Price (₱) <span class="text-muted fw-normal">(optional)</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light">₱</span>
-                                <input asp-for="DiscountPrice" class="form-control" type="number" step="0.01" min="0" placeholder="Leave blank if no discount" />
+                            <div class="pf-col">
+                                <label class="pf-label">Discount Price (₱) <span style="color:var(--muted);font-weight:400;text-transform:none">(optional)</span></label>
+                                <div class="pf-input-group">
+                                    <span class="pf-input-prefix">₱</span>
+                                    <input asp-for="DiscountPrice" class="pf-input" type="number" step="0.01" min="0" placeholder="Leave blank if none" />
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Stock -->
-                        <div class="col-md-6">
-                            <label asp-for="Stock" class="form-label fw-semibold small">Stock Quantity</label>
-                            <input asp-for="Stock" class="form-control" type="number" min="0" placeholder="0" />
-                        </div>
-
-                        <!-- Image URL -->
-                        <div class="col-md-6">
-                            <label asp-for="ImageUrl" class="form-label fw-semibold small">Image URL</label>
-                            <input asp-for="ImageUrl" class="form-control" placeholder="https://..." id="imgUrlInput" oninput="previewImg()" />
-                            <small class="text-muted">Paste a product image URL</small>
+                        <!-- Stock & Image URL -->
+                        <div class="pf-row mb-3">
+                            <div class="pf-col">
+                                <label class="pf-label">Stock Quantity</label>
+                                <input asp-for="Stock" class="pf-input" type="number" min="0" placeholder="0" />
+                            </div>
+                            <div class="pf-col">
+                                <label class="pf-label">Image URL</label>
+                                <input asp-for="ImageUrl" class="pf-input" placeholder="https://..." id="imgUrlInput" oninput="previewImg()" />
+                                <span style="font-size:.72rem;color:var(--muted);margin-top:4px;display:block">Paste a direct image URL (JPG/PNG/WebP)</span>
+                            </div>
                         </div>
 
                         <!-- Description -->
-                        <div class="col-12">
-                            <label asp-for="Description" class="form-label fw-semibold small">Description</label>
-                            <textarea asp-for="Description" class="form-control" rows="4"
+                        <div class="mb-3">
+                            <label class="pf-label">Description</label>
+                            <textarea asp-for="Description" class="pf-textarea"
                                       placeholder="Detailed product description, specs, features..."></textarea>
                         </div>
 
                         <!-- Active Toggle -->
-                        <div class="col-12">
-                            <div class="form-check form-switch">
+                        <div class="mb-4">
+                            <label class="pf-toggle-row" for="isActiveSwitch">
                                 <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" id="isActiveSwitch" />
-                                <label asp-for="IsActive" class="form-check-label fw-semibold small" for="isActiveSwitch">
-                                    Product is Active (visible to customers)
-                                </label>
-                            </div>
+                                <span class="pf-toggle-label">Product is Active <span style="color:var(--muted);font-weight:400">(visible to customers)</span></span>
+                            </label>
                         </div>
 
                         <!-- Submit -->
-                        <div class="col-12 d-flex gap-2 mt-2">
-                            <button type="submit" class="btn btn-primary fw-semibold px-4">
-                                <i class="fas fa-save me-2"></i>@(Model.Id == 0 ? "Add Product" : "Save Changes")
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" class="pf-btn-submit">
+                                <i class="fas fa-save"></i>
+                                @(Model.Id == 0 ? "Add Product" : "Save Changes")
                             </button>
-                            <a href="/Admin/Products" class="btn btn-outline-secondary px-4">Cancel</a>
+                            <a href="/Admin/Products" class="pf-btn-cancel">Cancel</a>
                         </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Preview Panel -->
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
-                <h6 class="fw-bold">Image Preview</h6>
-            </div>
-            <div class="card-body p-4 text-center">
-                <div id="imgPreviewWrap" style="width:100%;height:200px;background:#f8f9fa;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:1rem;">
-                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                    {
-                        <img id="imgPreview" src="@Model.ImageUrl" style="max-width:100%;max-height:100%;object-fit:contain;" />
-                    }
-                    else
-                    {
-                        <div id="imgPlaceholder">
-                            <i class="fas fa-image text-muted" style="font-size:3rem;"></i>
-                            <p class="text-muted small mt-2">Paste image URL to preview</p>
-                        </div>
-                    }
+                    </form>
                 </div>
-                <small class="text-muted">The image will be displayed as shown on the product card.</small>
             </div>
         </div>
 
-        <!-- Tips -->
-        <div class="card border-0 bg-info bg-opacity-10 border-info rounded-4 mt-3">
-            <div class="card-body p-4">
-                <h6 class="fw-semibold text-info mb-2"><i class="fas fa-lightbulb me-2"></i>Tips</h6>
-                <ul class="small text-muted mb-0 ps-3">
+        <!-- Sidebar: Preview + Tips -->
+        <div class="col-lg-4">
+            <div class="pf-card mb-3">
+                <div class="pf-card-header">
+                    <div class="pf-card-header-icon"><i class="fas fa-image"></i></div>
+                    <h6 class="pf-card-title">Image Preview</h6>
+                </div>
+                <div class="pf-card-body text-center">
+                    <div id="imgPreviewWrap" class="pf-img-wrap">
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <img id="imgPreview" src="@Model.ImageUrl" />
+                        }
+                        else
+                        {
+                            <div id="imgPlaceholder" style="text-align:center">
+                                <i class="fas fa-image" style="font-size:2.8rem;color:var(--muted);display:block;margin-bottom:.5rem"></i>
+                                <p style="font-size:.78rem;color:var(--muted);margin:0">Paste image URL to preview</p>
+                            </div>
+                        }
+                    </div>
+                    <p style="font-size:.75rem;color:var(--muted)">Displayed as shown on the product card.</p>
+                </div>
+            </div>
+
+            <div class="pf-tips">
+                <div class="pf-tips-title"><i class="fas fa-lightbulb"></i> Tips</div>
+                <ul>
                     <li>Discount price must be lower than regular price</li>
                     <li>Stock set to 0 shows "Out of Stock" to customers</li>
                     <li>Inactive products are hidden from the storefront</li>
-                    <li>Use direct image URLs (JPG/PNG/WebP)</li>
+                    <li>Use direct image URLs (JPG / PNG / WebP)</li>
                 </ul>
             </div>
         </div>
@@ -149,21 +343,18 @@
 function previewImg() {
     const url = document.getElementById('imgUrlInput').value;
     const wrap = document.getElementById('imgPreviewWrap');
-    const placeholder = document.getElementById('imgPlaceholder');
     let img = document.getElementById('imgPreview');
-
     if (url) {
         if (!img) {
             img = document.createElement('img');
             img.id = 'imgPreview';
-            img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;';
             wrap.innerHTML = '';
             wrap.appendChild(img);
         }
         img.src = url;
-        img.onerror = () => { wrap.innerHTML = '<p class="text-danger small">Invalid image URL</p>'; };
+        img.onerror = () => { wrap.innerHTML = '<p style="font-size:.78rem;color:var(--red)">Invalid image URL</p>'; };
     } else {
-        wrap.innerHTML = '<div id="imgPlaceholder"><i class="fas fa-image text-muted" style="font-size:3rem;"></i><p class="text-muted small mt-2">Paste image URL to preview</p></div>';
+        wrap.innerHTML = '<div style="text-align:center"><i class="fas fa-image" style="font-size:2.8rem;color:var(--muted);display:block;margin-bottom:.5rem"></i><p style="font-size:.78rem;color:var(--muted);margin:0">Paste image URL to preview</p></div>';
     }
 }
 </script>
